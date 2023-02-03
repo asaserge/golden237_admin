@@ -2,21 +2,31 @@ import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:golden237_admin/screens/product_screen.dart';
+import 'package:golden237_admin/screens/searchbar_screen.dart';
+import 'package:golden237_admin/screens/settings_screen.dart';
 import 'package:golden237_admin/screens/shipping_screen.dart';
 import 'package:golden237_admin/screens/user_screen.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:pie_chart/pie_chart.dart';
 
+import '../controller/procduct_controller.dart';
 import '../messages/constants.dart';
 import 'about_screen.dart';
+import 'add_category.dart';
+import 'add_coupon.dart';
+import 'add_product.dart';
+import 'add_user.dart';
 import 'category_screen.dart';
 import 'dev_screen.dart';
 import 'notification_screen.dart';
 import 'order_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key, required this.theme}) : super(key: key);
-
-  final ValueNotifier<ThemeMode> theme;
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -28,6 +38,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+    final Size size = MediaQuery.of(context).size;
+
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
@@ -43,7 +56,8 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             onPressed: (){
-
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => SearchbarScreen()));
             },
             icon: const Icon(Icons.search_outlined),
           ),
@@ -201,6 +215,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
             ListTile(
               leading: const Icon(
+                Icons.settings_outlined,
+              ),
+              title: const Text('Settings'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => SettingsScreen()));
+              },
+            ),
+            const Divider(),
+
+            ListTile(
+              leading: const Icon(
                 Icons.developer_mode_outlined,
               ),
               title: const Text('About'),
@@ -242,6 +269,559 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
 
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Card(
+                elevation: 2,
+                color: Colors.transparent,
+                child: Container(
+                  width: double.infinity,
+                  height: size.height / 9,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12.0),
+                      color: Colors.white38),
+                  child: GridView(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 16),
+                    children: [
+                      Container(
+                        width: size.width / 1.2,
+                        height: size.height / 10,
+                        margin: const EdgeInsets.all(10.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text('234',
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 24)),
+                                Text('All Products',
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w300,
+                                        fontSize: 13))
+                              ],
+                            ),
+                            CircularPercentIndicator(
+                              radius: 27.0,
+                              lineWidth: 5.0,
+                              animation: true,
+                              percent: 0.7,
+                              center: Text(
+                                "73%",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15.0),
+                              ),
+                              circularStrokeCap: CircularStrokeCap.round,
+                              progressColor: Colors.deepOrangeAccent,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: size.width / 1.2,
+                        height: size.height / 10,
+                        margin: const EdgeInsets.all(10.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text('06',
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 24)),
+                                Text('All Categories',
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w300,
+                                        fontSize: 13))
+                              ],
+                            ),
+                            CircularPercentIndicator(
+                              radius: 27.0,
+                              lineWidth: 5.0,
+                              animation: true,
+                              percent: 0.2,
+                              center: Text(
+                                "27%",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15.0),
+                              ),
+                              circularStrokeCap: CircularStrokeCap.round,
+                              progressColor: Colors.yellowAccent,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 25.0),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Column(
+                    children: [
+                      Text('XAF 102,7800',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 24)),
+                      Text('Today\'s Sale',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontWeight: FontWeight.w300, fontSize: 15)),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Text('XAF 520,500',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 24)),
+                      Text('Week\'s Sale',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontWeight: FontWeight.w300, fontSize: 15)),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 25.0),
+
+              PieChart(
+                dataMap: dataMap,
+                animationDuration: const Duration(milliseconds: 800),
+                chartLegendSpacing: 32,
+                chartRadius: MediaQuery.of(context).size.width / 3.2,
+                colorList: colorList,
+                initialAngleInDegree: 0,
+                chartType: ChartType.ring,
+                ringStrokeWidth: 27,
+                centerText: "Golden237",
+                legendOptions: const LegendOptions(
+                  showLegendsInRow: false,
+                  legendPosition: LegendPosition.right,
+                  showLegends: true,
+                  legendTextStyle: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                chartValuesOptions: const ChartValuesOptions(
+                  showChartValueBackground: true,
+                  showChartValues: true,
+                  showChartValuesInPercentage: false,
+                  showChartValuesOutside: false,
+                  decimalPlaces: 0,
+                ),
+                // gradientList: ---To add gradient colors---
+                // emptyColorGradient: ---Empty Color gradient---
+              ),
+
+              const SizedBox(height: 15.0),
+
+              const Text(
+                  'Welcome Admin, you have the ability to create, view, update and/or '
+                      'delete categories, products, users, coupons, from this panel!',
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 3),
+              const SizedBox(height: 15.0),
+              const Text('Today', overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 24)),
+              Container(
+                width: double.infinity,
+                height: size.height / 9,
+                padding: const EdgeInsets.only(top: 10),
+                child: GridView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16),
+                  children: [
+                    Container(
+                      width: size.width / 1.5,
+                      height: size.height / 10,
+                      margin: const EdgeInsets.all(10.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Text('36',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 24)),
+                              Text('Interactions',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w300,
+                                      fontSize: 13))
+                            ],
+                          ),
+                          LinearPercentIndicator(
+                            animation: true,
+                            lineHeight: 15.0,
+                            animationDuration: 2500,
+                            percent: 0.8,
+                            center: Text("80.0%",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w300,
+                                    fontSize: 13,
+                                    color: Colors.black54)),
+                            linearStrokeCap: LinearStrokeCap.roundAll,
+                            progressColor: Colors.green,
+                          )
+                        ],
+                      ),
+                    ),
+                    Container(
+                      width: size.width / 1.5,
+                      height: size.height / 10,
+                      margin: EdgeInsets.all(10.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Text('7',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 24)),
+                              Text('Orders',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w300,
+                                      fontSize: 13))
+                            ],
+                          ),
+                          LinearPercentIndicator(
+                            animation: true,
+                            lineHeight: 15.0,
+                            animationDuration: 2500,
+                            percent: 0.35,
+                            center: Text("35.0%",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w300,
+                                    fontSize: 13,
+                                    color: Colors.black54)),
+                            linearStrokeCap: LinearStrokeCap.roundAll,
+                            progressColor: Colors.blue,
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: double.infinity,
+                height: size.height / 9,
+                padding: const EdgeInsets.only(top: 10),
+                child: GridView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16),
+                  children: [
+                    Container(
+                      width: size.width / 1.5,
+                      height: size.height / 10,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Text('3',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 24)),
+                              Text('Request',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w300,
+                                      fontSize: 13))
+                            ],
+                          ),
+                          LinearPercentIndicator(
+                            animation: true,
+                            lineHeight: 15.0,
+                            animationDuration: 2500,
+                            percent: 0.15,
+                            center: Text("15.0%",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w300,
+                                    fontSize: 13,
+                                    color: Colors.black54)),
+                            linearStrokeCap: LinearStrokeCap.roundAll,
+                            progressColor: Colors.orange,
+                          )
+                        ],
+                      ),
+                    ),
+                    Container(
+                      width: size.width / 1.5,
+                      height: size.height / 10,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Text('9',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 24)),
+                              Text('Contacts',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w300,
+                                      fontSize: 13))
+                            ],
+                          ),
+                          LinearPercentIndicator(
+                            animation: true,
+                            lineHeight: 15.0,
+                            animationDuration: 2500,
+                            percent: 0.45,
+                            center: Text("45.0%",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w300,
+                                    fontSize: 13,
+                                    color: Colors.black54)),
+                            progressColor: Colors.purple,
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 25.0),
+              const Text('This Week', overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 24)),
+              Container(
+                width: double.infinity,
+                height: size.height / 9,
+                padding: const EdgeInsets.only(top: 10),
+                child: GridView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16),
+                  children: [
+                    Container(
+                      width: size.width / 1.5,
+                      height: size.height / 10,
+                      margin: const EdgeInsets.all(10.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Text('36',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 24)),
+                              Text('Interactions',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w300,
+                                      fontSize: 13))
+                            ],
+                          ),
+                          LinearPercentIndicator(
+                            animation: true,
+                            lineHeight: 15.0,
+                            animationDuration: 2500,
+                            percent: 0.63,
+                            center: Text("63.0%",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w300,
+                                    fontSize: 13,
+                                    color: Colors.black54)),
+                            linearStrokeCap: LinearStrokeCap.roundAll,
+                            progressColor: Colors.green,
+                          )
+                        ],
+                      ),
+                    ),
+                    Container(
+                      width: size.width / 1.5,
+                      height: size.height / 10,
+                      margin: const EdgeInsets.all(10.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Text('38',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 24)),
+                              Text('Orders',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w300,
+                                      fontSize: 13))
+                            ],
+                          ),
+                          LinearPercentIndicator(
+                            animation: true,
+                            lineHeight: 15.0,
+                            animationDuration: 2500,
+                            percent: 0.41,
+                            center: Text("41.0%",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w300,
+                                    fontSize: 13,
+                                    color: Colors.black54)),
+                            linearStrokeCap: LinearStrokeCap.roundAll,
+                            progressColor: Colors.blue,
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: double.infinity,
+                height: size.height / 9,
+                padding: const EdgeInsets.only(top: 10),
+                child: GridView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16),
+                  children: [
+                    Container(
+                      width: size.width / 1.5,
+                      height: size.height / 10,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Text('19',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 24)),
+                              Text('Request',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w300,
+                                      fontSize: 13))
+                            ],
+                          ),
+                          LinearPercentIndicator(
+                            animation: true,
+                            lineHeight: 15.0,
+                            animationDuration: 2500,
+                            percent: 0.19,
+                            center: Text("19.0%",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w300,
+                                    fontSize: 13,
+                                    color: Colors.black54)),
+                            linearStrokeCap: LinearStrokeCap.roundAll,
+                            progressColor: Colors.orange,
+                          )
+                        ],
+                      ),
+                    ),
+                    Container(
+                      width: size.width / 1.5,
+                      height: size.height / 10,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Text('39',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 24)),
+                              Text('Contacts',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w300,
+                                      fontSize: 13))
+                            ],
+                          ),
+                          LinearPercentIndicator(
+                            animation: true,
+                            lineHeight: 15.0,
+                            animationDuration: 2500,
+                            percent: 0.63,
+                            center: Text("63.0%",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w300,
+                                    fontSize: 13,
+                                    color: Colors.black54)),
+                            progressColor: Colors.purple,
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+
       floatingActionButton: SpeedDial(
         icon: Icons.add,
         activeIcon: Icons.close,
@@ -273,7 +853,8 @@ class _HomeScreenState extends State<HomeScreen> {
             foregroundColor: Colors.white,
             label: 'Product',
             onTap: () {
-
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => AddProduct()));
             },
           ),
 
@@ -283,7 +864,19 @@ class _HomeScreenState extends State<HomeScreen> {
               foregroundColor: Colors.white,
               label: 'Category',
               onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => AddCategory()));
+              }
+          ),
 
+          SpeedDialChild(
+              child: const Icon(Icons.discount_outlined),
+              backgroundColor: Colors.pink,
+              foregroundColor: Colors.white,
+              label: 'Coupon',
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => AddCoupon()));
               }
           ),
 
@@ -293,7 +886,8 @@ class _HomeScreenState extends State<HomeScreen> {
               foregroundColor: Colors.white,
               label: 'User',
               onTap: () {
-
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => AddUser()));
               }
           ),
 
