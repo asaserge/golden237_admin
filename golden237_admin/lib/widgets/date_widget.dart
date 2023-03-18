@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../messages/constants.dart';
+import '../utils/constants.dart';
 
 class DateWidget extends StatefulWidget {
-  const DateWidget({Key? key}) : super(key: key);
+  DateWidget({Key? key, required this.startDate,
+    required this.endDate}) : super(key: key);
+  final TextEditingController startDate;
+  final TextEditingController endDate;
 
   @override
   State<DateWidget> createState() => _DateWidgetState();
@@ -12,30 +15,13 @@ class DateWidget extends StatefulWidget {
 
 class _DateWidgetState extends State<DateWidget> {
 
-  late TextEditingController startDate;
-  late TextEditingController endDate;
-
-  @override
-  void initState() {
-    startDate = TextEditingController();
-    endDate = TextEditingController();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    startDate.dispose();
-    endDate.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Expanded(
           child: TextFormField(
-            controller: startDate,
+            controller: widget.startDate,
             readOnly: true,
             validator: (startDate){
               if(startDate==null|| startDate.isEmpty){
@@ -49,14 +35,14 @@ class _DateWidgetState extends State<DateWidget> {
               hintText: 'Start Date',
               focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
-                  borderSide: BorderSide(
+                  borderSide: const BorderSide(
                       width: 1,
                       color: primaryColor
                   )
               ),
               border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
-                  borderSide: BorderSide(
+                  borderSide: const BorderSide(
                       width: 1,
                       color: Colors.white38
                   )
@@ -72,7 +58,7 @@ class _DateWidgetState extends State<DateWidget> {
               if(startPickedDate!= null){
                 String formattedDate = DateFormat('dd-MM-yyyy').format(startPickedDate);
                 setState(() {
-                  startDate.text = formattedDate; //set output date to TextField value.
+                  widget.startDate.text = formattedDate; //set output date to TextField value.
                 });
               }
             },
@@ -83,7 +69,7 @@ class _DateWidgetState extends State<DateWidget> {
 
         Expanded(
           child: TextFormField(
-            controller: endDate,
+            controller: widget.endDate,
             readOnly: true,
             validator: (endDate){
               if(endDate==null || endDate.isEmpty){
@@ -96,7 +82,7 @@ class _DateWidgetState extends State<DateWidget> {
                 hintText: 'End Date',
                 focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide(
+                    borderSide: const BorderSide(
                         width: 1,
                         color: primaryColor
                     )
@@ -110,8 +96,8 @@ class _DateWidgetState extends State<DateWidget> {
                 )
             ),
             onTap: () async{
-              if (startDate.text.isNotEmpty) {
-                String dateTime = startDate.text;
+              if (widget.startDate.text.isNotEmpty) {
+                String dateTime = widget.startDate.text;
                 DateFormat inputFormat = DateFormat('dd-MM-yyyy');
                 DateTime input = inputFormat.parse(dateTime);
 
@@ -124,7 +110,7 @@ class _DateWidgetState extends State<DateWidget> {
                 if(endPickedDate!= null){
                   String formattedDate = DateFormat('dd-MM-yyyy').format(endPickedDate);
                   setState(() {
-                    endDate.text = formattedDate;
+                    widget.endDate.text = formattedDate;
                   }
                   );
                 }

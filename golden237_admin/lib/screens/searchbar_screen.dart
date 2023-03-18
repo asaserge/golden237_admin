@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_state_manager/src/simple/get_state.dart';
+import 'package:golden237_admin/controller/product_controller.dart';
+
 
 class SearchbarScreen extends StatefulWidget {
   const SearchbarScreen({Key? key}) : super(key: key);
@@ -10,9 +13,11 @@ class SearchbarScreen extends StatefulWidget {
 class _SearchbarScreenState extends State<SearchbarScreen> {
 
   late TextEditingController _searchController;
+  bool isSearch = false;
   int textLength = 0;
   String enteredText = '';
   late ListView _listView;
+  late AsyncSnapshot snapshotData;
 
   @override
   void initState() {
@@ -44,7 +49,17 @@ class _SearchbarScreenState extends State<SearchbarScreen> {
           decoration: InputDecoration(
             counterText: '',
             hintText: 'Search products...',
-            prefixIcon: const Icon(Icons.mic_outlined, color: Colors.white),
+            prefixIcon: GetBuilder<ProductController>(
+              init: ProductController(),
+              builder: (value){
+                return InkWell(
+                  onTap: (){
+
+                  },
+                  child: const Icon(Icons.search_outlined, color: Colors.white),
+                );
+              },
+            ),
             suffixIcon: textLength > 0 ?
               InkWell(
                 onTap: (){
@@ -64,48 +79,30 @@ class _SearchbarScreenState extends State<SearchbarScreen> {
 
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-        child: textLength >= 3 ?
-        ListView.builder(
-            shrinkWrap: true,
-            itemCount: 3,
-            itemBuilder: (context, index){
-              return Column(
-                children: [
-                  ListTile(
-                    leading: Icon(Icons.search_outlined),
-                    title: Text('Black Jean Pant'),
-                    onTap: (){
-
-                    },
-                  ),
-                  Divider()
-                ],
-              );
-            }
-        ) : null,
+        child: isSearch ?
+            searchedData() :
+            const Center(
+              child: Text('Search a product'),
+            )
       ),
     );
   }
 
-  ///\////////////////Search/////////////
-
-  searchEnteredText(String searchText){
-    List<String> caseSearchList = [];
-    String temp = "";
-    for (int i = 0; i < searchText.length; i++) {
-      temp = temp + searchText[i];
-      caseSearchList.add(temp);
-    }
-
-    // List<DocumentSnapshot> documentList = (await Firestore.instance
-    //     .collection("cases")
-    //     .document(await firestoreProvider.getUid())
-    //     .collection(caseCategory)
-    //     .where("caseNumber", arrayContains: query)
-    //     .getDocuments())
-    // .documents;
-    //
-    // return documentList;
+  Widget searchedData(){
+    return ListView.builder(
+        itemCount: snapshotData.data.length,
+        itemBuilder: (context, index){
+          return ListTile(
+            leading: CircleAvatar(
+              backgroundImage: NetworkImage(
+                  snapshotData.data[index]['image'].data
+              ),
+            ),
+            title: Text(snapshotData.data[index]['name']),
+            trailing: Text('${snapshotData.data[index]['price']}'),
+          );
+        }
+    );
   }
 
 }

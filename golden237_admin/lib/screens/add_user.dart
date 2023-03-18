@@ -14,6 +14,7 @@ class AddUser extends StatefulWidget {
 class _AddUserState extends State<AddUser> {
 
   final TextEditingController _controllerEmail = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -35,25 +36,42 @@ class _AddUserState extends State<AddUser> {
 
               const SizedBox(height: 25),
 
-              CustomInput(
-                controller: _controllerEmail,
-                hintText: 'User\'s Email',
-                maxCount: 25,
-                label: 'Email',
-                prefixIcon: Icons.email_outlined,
-                textInputType: TextInputType.emailAddress,
-                onChange: (val){
+              Form(
+                key: _formKey,
+                child: CustomInput(
+                  controller: _controllerEmail,
+                  hintText: 'User\'s Email',
+                  maxCount: 35,
+                  label: 'Email',
+                  prefixIcon: Icons.email_outlined,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Email is required!';
+                    }
+                    if (!(regex.hasMatch(value))) {
+                      return "Enter a valid email address!";
+                    }
+                    return null;
+                  },
+                  textInputType: TextInputType.emailAddress,
+                  onChange: (val){
 
-                },
+                  },
+                ),
               ),
-
 
               const SizedBox(height: 35),
 
               SubmitButton(
                 text: 'Invite User',
+                isEnabled: true,
                 onPressed: () {
-
+                  if(_formKey.currentState!.validate()){
+                    //Todo invite user
+                  }
+                  else{
+                    return;
+                  }
                 },
                 isLoading: false,
               ),
@@ -66,4 +84,9 @@ class _AddUserState extends State<AddUser> {
       ),
     );
   }
+
 }
+
+RegExp regex = RegExp(
+    r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$');
+

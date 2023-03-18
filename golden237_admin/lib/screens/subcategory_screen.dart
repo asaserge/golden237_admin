@@ -2,50 +2,56 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:golden237_admin/screens/subcategory_screen.dart';
+import 'package:golden237_admin/screens/catproduct_screen.dart';
 
 import '../controller/category_controller.dart';
+import '../models/category_model.dart';
+import '../models/coupon_model.dart';
 import '../services/apis.dart';
 import '../utils/constants.dart';
 import '../utils/helpers.dart';
 import '../widgets/custom_fab_widget.dart';
 import 'modify_category.dart';
+import 'modify_subcategory.dart';
 
-class CategoryScreen extends StatefulWidget {
-  const CategoryScreen({Key? key}) : super(key: key);
+class SubCategoryScreen extends StatefulWidget {
+  const SubCategoryScreen({Key? key, this.catSnap, this.index}) : super(key: key);
+  final AsyncSnapshot? catSnap;
+  final int? index;
 
   @override
-  State<CategoryScreen> createState() => _CategoryScreenState();
+  State<SubCategoryScreen> createState() => _SubCategoryScreenState();
 }
 
-class _CategoryScreenState extends State<CategoryScreen> {
+class _SubCategoryScreenState extends State<SubCategoryScreen> {
 
   Helper helper = Helper();
   bool isLoading = false;
-  final CategoryController categoryController = Get.find();
+  final CategoryController controller = Get.find();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Category', style: TextStyle(fontSize: 18)),
+          title: Text(widget.catSnap?.data[widget.index]['name'], style: const TextStyle(fontSize: 18)),
           actions: [
             Obx(() => Padding(
-              padding: const EdgeInsets.only(top: 22.0),
-              child: Text('(${categoryController.catCount.value})'))
+                padding: const EdgeInsets.only(top: 22.0),
+                child: Text('(${controller.subCatCount.value})'))
             ),
+            const SizedBox(width: 10.0),
             IconButton(
-              onPressed: (){
-                showHelpDialog();
-              },
-              icon: const Icon(Icons.help_outline_outlined)
+                onPressed: (){
+                  showHelpDialog(context);
+                },
+                icon: const Icon(Icons.help_outline_outlined)
             ),
             const SizedBox(width: 10.0)
           ],
         ),
 
         body: FutureBuilder(
-            future: categoryController.getMainCategory(),
+            future: controller.getSpecificSubCategory(widget.catSnap?.data[widget.index]['id']),
             builder: (context, snapshot){
               if(snapshot.hasError) {
                 return Center(
@@ -74,92 +80,93 @@ class _CategoryScreenState extends State<CategoryScreen> {
         ),
 
         floatingActionButton: const CustomFabWidget(
-          route: ModifyCategory(),
-          text: 'Category', width: 120.0,
+          route: ModifySubCategory(),
+          text: 'Subcategory', width: 120.0,
         )
     );
   }
 
-  Widget categoryWidget(AsyncSnapshot snapshotCat){
+  Widget categoryWidget(AsyncSnapshot snapshotSubCat){
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
       child: ListView.builder(
-        itemCount: snapshotCat.data.length ?? 0,
-        itemBuilder: (context, index){
-          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-            categoryController.catCount.value = snapshotCat.data.length;
-          });
-          return GestureDetector(
-            onTap: (){
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => SubCategoryScreen(catSnap: snapshotCat, index: index))
-              );
-            },
-            onLongPress: (){
-              showMoreOptions(snapshotCat, index);
-            },
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    SizedBox(
-                      height: 50,
-                      width: 50,
-                      child: CachedNetworkImage(
-                        imageUrl: "http://via.placeholder.com/200x150",
-                        imageBuilder: (context, imageProvider) => Container(
-                          padding: const EdgeInsets.all(12.0),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10.0),
-                            image: DecorationImage(
-                                image: NetworkImage(snapshotCat.data[index]['image']),
-                                fit: BoxFit.contain,
-                                // colorFilter:
-                                // const ColorFilter.mode(Colors.white70, BlendMode.colorBurn)
+          itemCount: snapshotSubCat.data.length ?? 0,
+          itemBuilder: (context, index){
+            WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+              controller.subCatCount.value = snapshotSubCat.data.length;
+            });
+            return GestureDetector(
+              onTap: (){
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => CatProductScreen(index: index,
+                        subCatSnap: snapshotSubCat, subCat: widget.catSnap?.data[widget.index]['name']))
+                );
+              },
+              onLongPress: (){
+
+              },
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      SizedBox(
+                        height: 50,
+                        width: 50,
+                        child: CachedNetworkImage(
+                          imageUrl: "http://via.placeholder.com/200x150",
+                          imageBuilder: (context, imageProvider) => Container(
+                            padding: const EdgeInsets.all(12.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10.0),
+                              image: DecorationImage(
+                                  image: NetworkImage(snapshotSubCat.data[index]['image']),
+                                  fit: BoxFit.contain,
+                                  // colorFilter:
+                                  // const ColorFilter.mode(Colors.white70, BlendMode.colorBurn)
+                              ),
                             ),
                           ),
+                          errorWidget: (context, url, error) => const Icon(Icons.error),
                         ),
-                        errorWidget: (context, url, error) => const Icon(Icons.error),
                       ),
-                    ),
-                    const SizedBox(width: 8.0),
-                    Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(snapshotCat.data[index]['name'], maxLines: 1, overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 18)),
-                            const SizedBox(height: 8.0),
-                            Text(snapshotCat.data[index]['detail'],
-                                style: const TextStyle(fontSize: 10)),
-                          ],
-                        )
-                    ),
-                    GestureDetector(
-                      onTap: (){
-                        showMoreOptions(snapshotCat, index);
-                      },
-                      child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 10.0),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5.0),
-                              color: Colors.grey.withOpacity(0.3)
-                          ),
-                          child: const Icon(Icons.more_vert_outlined, color: primaryColor, size: 20.0,)
+                      const SizedBox(width: 12.0),
+                      Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(snapshotSubCat.data[index]['name'],
+                                  style: const TextStyle(fontSize: 18)),
+                              const SizedBox(height: 8.0),
+                              Text(snapshotSubCat.data[index]['detail'],
+                                  style: TextStyle(fontSize: 10)),
+                            ],
+                          )
                       ),
-                    ),
-                    const SizedBox(width: 18.0),
-                    const Icon(Icons.arrow_forward_ios_outlined, size: 14)
+                      GestureDetector(
+                        onTap: (){
+                          showMoreOptions(snapshotSubCat, index);
+                        },
+                        child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 10.0),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5.0),
+                                color: Colors.grey.withOpacity(0.3)
+                            ),
+                            child: const Icon(Icons.more_vert_outlined, color: primaryColor, size: 20.0,)
+                        ),
+                      ),
+                      const SizedBox(width: 18.0),
+                      const Icon(Icons.arrow_forward_ios_outlined, size: 14)
 
-                  ],
-                ),
-                const SizedBox(height: 8.0),
-                const Divider(thickness: 2),
-                const SizedBox(height: 10.0),
-              ],
-            ),
-          );
-        }
+                    ],
+                  ),
+                  const SizedBox(height: 8.0),
+                  const Divider(thickness: 2),
+                  const SizedBox(height: 10.0)
+                ],
+              ),
+            );
+          }
       ),
     );
   }
@@ -189,7 +196,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5)
+                  borderRadius: BorderRadius.circular(5)
               ),
               child: const Text("Cancel", style: TextStyle(color: Colors.black54)),
             ),
@@ -200,13 +207,13 @@ class _CategoryScreenState extends State<CategoryScreen> {
               setState(() {
                 isLoading = !isLoading;
               });
-              await Apis.client.from('category').delete().eq('id', obj.data[index]['id'])
+              await Apis.client.from('subcategory').delete().eq('id', obj.data[index]['id'])
                   .then((value) {
                 Navigator.of(ctx).pop();
                 setState(() {
 
                 });
-                    return snackBarFailed;
+                return snackBarFailed;
               });
             },
             child: Container(
@@ -218,33 +225,6 @@ class _CategoryScreenState extends State<CategoryScreen> {
               child: const Text("Delete", style: TextStyle(color: Colors.black54)),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  showHelpDialog(){
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        content: SingleChildScrollView(
-          child: Column(
-            children: const [
-              Text('Long press to see more options like edit and delete, can press to see subcategories as well.'),
-              SizedBox(height: 10.0),
-
-            ],
-          ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-            },
-            child: const Text("Got it", style: TextStyle(color: Colors.green)),
-          ),
-
         ],
       ),
     );
@@ -311,5 +291,33 @@ class _CategoryScreenState extends State<CategoryScreen> {
       },
     ),
   );
+
+  showHelpDialog(BuildContext context){
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        content: SingleChildScrollView(
+          child: Column(
+            children: const [
+              Text('Long press to see more subcategory options like edit and delete, can press to see subcategories products.'),
+              SizedBox(height: 10.0),
+
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+            child: const Text("Got it", style: TextStyle(color: Colors.green)),
+          ),
+
+        ],
+      ),
+    );
+  }
+
 
 }

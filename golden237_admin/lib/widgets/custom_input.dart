@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:golden237_admin/messages/constants.dart';
+import '../utils/constants.dart';
 
 class CustomInput extends StatelessWidget {
   CustomInput({Key? key, required this.controller,
     this.textInputType, required this.hintText,
     required this.prefixIcon, this.maxLines, this.maxCount,
-    this.onChange, this.prefixText, required this.label
+    this.onChange, this.prefixText, required this.label, this.validator
   }) : super(key: key);
   final TextEditingController controller;
   final String hintText;
@@ -17,6 +17,7 @@ class CustomInput extends StatelessWidget {
   int? maxLines;
   TextInputType? textInputType;
   String? Function(String?)? onChange;
+  FormFieldValidator? validator;
 
 
   @override
@@ -27,9 +28,11 @@ class CustomInput extends StatelessWidget {
       maxLines: maxLines ?? 1,
       maxLength: maxCount ?? 15,
       onChanged: onChange,
+      validator: validator,
       cursorColor: Get.isDarkMode ? Colors.white : Colors.black54,
       keyboardType: textInputType ?? TextInputType.text,
       decoration: InputDecoration(
+        contentPadding: EdgeInsets.zero,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.0),
           borderSide: const BorderSide(
