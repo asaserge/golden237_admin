@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
+import 'package:get/get.dart';
 
+import '../controller/order_controller.dart';
 import '../utils/constants.dart';
 import '../widgets/header_widget.dart';
 import '../widgets/order_widget.dart';
@@ -14,11 +17,12 @@ class OrderScreen extends StatefulWidget {
 class _OrderScreenState extends State<OrderScreen> with TickerProviderStateMixin{
 
   late TabController tabController;
+  OrderController orderController = Get.find();
 
   @override
   void initState() {
      tabController  = TabController(length: 2, vsync: this,
-     animationDuration: const Duration(milliseconds: 500));
+     animationDuration: const Duration(milliseconds: 300));
     super.initState();
   }
 
@@ -29,6 +33,19 @@ class _OrderScreenState extends State<OrderScreen> with TickerProviderStateMixin
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Orders'),
+
+        actions: [
+          IconButton(
+              onPressed: (){
+                setState(() {});
+              },
+              icon: const Icon(Icons.refresh_outlined)
+          ),
+          const SizedBox(
+            width: 20.0,
+          )
+        ],
+
       ),
 
       body: SingleChildScrollView(
@@ -37,8 +54,8 @@ class _OrderScreenState extends State<OrderScreen> with TickerProviderStateMixin
           child: Column(
             children: [
               const HeaderWidget(
-                text: 'You will be able to view, update, accept or decline orders on GOlden237 Sctore',
-                image: 'assets/icons/category-icon.png',
+                text: 'You will be able to view, update, accept or decline orders on GOlden237 Store',
+                image: 'assets/icons/icons-order.png',
               ),
 
               const SizedBox(height: 25),
@@ -58,9 +75,11 @@ class _OrderScreenState extends State<OrderScreen> with TickerProviderStateMixin
                   indicatorWeight: 2.0,
                   indicatorSize: TabBarIndicatorSize.label,
                   controller: tabController,
-                  tabs: const [
-                    Tab(icon: Icon(Icons.bookmark_border_outlined), text: 'Active Orders (4)'),
-                    Tab(icon: Icon(Icons.history_outlined), text: 'Order History (405)'),
+                  tabs: [
+                    Tab(icon: const Icon(Icons.bookmark_border_outlined),
+                        text: 'Active Orders (${orderController.orderCount.value})'),
+                    Tab(icon: const Icon(Icons.history_outlined),
+                        text: 'Order History (${orderController.deliverCount.value})'),
                   ],
                 ),
               ),
@@ -71,8 +90,63 @@ class _OrderScreenState extends State<OrderScreen> with TickerProviderStateMixin
                 child: TabBarView(
                     controller: tabController,
                     children: [
-                      OrderWidget(),
-                      OrderWidget(),
+                      FutureBuilder(
+                          future: orderController.getAllOrders(),
+                          builder: (context, snapshot){
+                            if(snapshot.hasError) {
+                              return Center(
+                                child: Container(
+                                  padding: const EdgeInsets.all(10.0),
+                                  margin: const EdgeInsets.symmetric(horizontal: 10.0),
+                                  color: Colors.white,
+                                  child: Text('Something went wrong: ${snapshot.error}',
+                                      style: const TextStyle(color: Colors.red)
+                                  ),
+                                ),
+                              );
+                            }
+                            if(snapshot.hasData && snapshot.connectionState == ConnectionState.done){
+                              return OrderWidget(orderSnap: snapshot);
+                            }
+                            else{
+                              return const Center(
+                                  child: CircularProgressIndicator(
+                                    color: primaryColor,
+                                    strokeWidth: 3,
+                                  )
+                              );
+                            }
+                          }
+                      ),
+
+                      FutureBuilder(
+                          future: orderController.getDeliveredOrders(),
+                          builder: (context, snapshot){
+                            if(snapshot.hasError) {
+                              return Center(
+                                child: Container(
+                                  padding: const EdgeInsets.all(10.0),
+                                  margin: const EdgeInsets.symmetric(horizontal: 10.0),
+                                  color: Colors.white,
+                                  child: Text('Something went wrong: ${snapshot.error}',
+                                      style: const TextStyle(color: Colors.red)
+                                  ),
+                                ),
+                              );
+                            }
+                            if(snapshot.hasData && snapshot.connectionState == ConnectionState.done){
+                              return OrderWidget(orderSnap: snapshot);
+                            }
+                            else{
+                              return const Center(
+                                  child: CircularProgressIndicator(
+                                    color: primaryColor,
+                                    strokeWidth: 3,
+                                  )
+                              );
+                            }
+                          }
+                      ),
                     ]
                 ),
               ),
@@ -83,4 +157,5 @@ class _OrderScreenState extends State<OrderScreen> with TickerProviderStateMixin
       ),
     );
   }
+
 }

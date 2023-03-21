@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:golden237_admin/screens/add_product.dart';
+import 'package:golden237_admin/screens/modify_product.dart';
 import 'package:golden237_admin/screens/home_screen.dart';
 import 'package:golden237_admin/screens/product_detail_screen.dart';
 import 'package:intl/intl.dart';
@@ -102,8 +102,7 @@ class _CatProductScreenState extends State<CatProductScreen> {
     return ListView.builder(
       itemCount: snap.data.length ?? 0,
       itemBuilder: (context, index){
-        return ProductWidget(productSnapshot: snap, index: index,
-          subCat: widget.subCatSnap.data[widget.index]['name']);
+        return ProductWidget(productSnapshot: snap, index: index);
       },
 
     );

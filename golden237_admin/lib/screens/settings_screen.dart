@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../utils/constants.dart';
+import '../utils/theme.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -48,7 +49,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onChanged: (value){
                   setState(() {
                     _darkModeOn = value;
+                    storage.write('isDark', value);
                   });
+                  if(_darkModeOn){
+                    Get.changeTheme(lightTheme);
+                  }
+                  else{
+                    Get.changeTheme(darkTheme);
+                  }
 
                 }
               ),

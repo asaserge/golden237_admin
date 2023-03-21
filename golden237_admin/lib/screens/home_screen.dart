@@ -1,5 +1,6 @@
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:golden237_admin/controller/product_controller.dart';
 import 'package:get/get.dart';
 
@@ -10,8 +11,11 @@ import 'package:golden237_admin/screens/settings_screen.dart';
 import 'package:golden237_admin/screens/coupon_screen.dart';
 import 'package:golden237_admin/screens/subcategory_screen.dart';
 import 'package:golden237_admin/screens/user_screen.dart';
+import 'package:intl/intl.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../controller/category_controller.dart';
+import '../controller/order_controller.dart';
+import '../services/apis.dart';
 import '../utils/constants.dart';
 import '../utils/messages.dart';
 import 'about_screen.dart';
@@ -34,8 +38,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final GlobalKey<ScaffoldState> scaffoldKey  = GlobalKey();
   ProductController productController = Get.put(ProductController());
+  OrderController orderController = Get.put(OrderController());
   final CategoryController categoryController = Get.put(CategoryController());
+  final DateFormat formatDate = DateFormat.yMMMMEEEEd();
   String name = '';
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
 
   @override
@@ -56,13 +68,6 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text(appName, style: TextStyle(fontSize: 16)),
 
         actions: [
-          IconButton(
-            onPressed: (){
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => SearchbarScreen()));
-            },
-            icon: const Icon(Icons.search_outlined),
-          ),
 
           Badge(
               position: BadgePosition.topEnd(top: -10, end: -12),
@@ -70,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ignorePointer: false,
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => NotificationScreen()));
+                    builder: (context) => const NotificationScreen()));
               },
               badgeContent: const Text('2', style: TextStyle(fontSize: 8),),
               badgeAnimation: const BadgeAnimation.rotation(
@@ -90,15 +95,27 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           IconButton(
+              onPressed: (){
+                Phoenix.rebirth(context);
+              },
+              icon: const Icon(Icons.refresh_outlined)
+          ),
+
+          IconButton(
             onPressed: (){
               showSimpleDialog(
                   'Quick Help',
-                  'The dialog is a type of widget which comes on the window or the screen which contains any critical information or can ask for any decision. When a dialog box is popped up all the other functions get disabled until you close the dialog box or provide an answer. We use a dialog box for a different type of condition such as an alert notification, or simple notification in which different options are shown, or we can also make a dialog box that can be used as a tab for showing the dialog box. '
-                      'Alert dialog tells the user about any condition that requires any recognition. The alert dialog contains an optional title and an optional list of actions.  We have different no of actions as our requirements. Sometimes the content is too large compared to the screen size so for resolving this problem we may have to use the expanded class.'
+                  'Access different options by going to the main menu on the top left. You can create, delete, update or view'
+                      ' products, coupons, users as you wish, each section have additional help section. As for categories and '
+                      ' subcategories, you can only view them. In case of any other assistance, don\'t hesitate to contact us '
+                      'via email at awujiaa2018@gmail.com.'
               );
             },
             icon: const Icon(Icons.help_outline_outlined),
           ),
+
+          const SizedBox(width: 8.0),
+
         ],
       ),
 
@@ -275,7 +292,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: () {
                 Navigator.pop(context);
                 Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => DevScreen()));
+                    builder: (context) => const DevScreen()));
               },
             ),
 
@@ -289,7 +306,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Card(
                 elevation: 2,
@@ -428,6 +445,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 35.0),
 
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Image.asset('assets/icons/icons-analytic.png'),
+                  Image.asset('assets/icons/icons-admin.png'),
+                ],
+              ),
+
+              Column(
+                children: [
+                  const Text('Today is', style: TextStyle(fontSize: 12.0)),
+                  Text(formatDate.format(DateTime.now()), maxLines: 1, overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 18.0, color: Colors.red)),
+                ],
+              ),
+
+              const SizedBox(height: 35.0),
+
               SizedBox(
                 height: MediaQuery.of(context).size.height / 1.5,
                 width: double.infinity,
@@ -443,27 +478,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     overViewWidget(msg: 'All Categories', title: 'Categories',
                       iconData: Icons.category_outlined, color: Colors.blue,
-                      value: categoryController.catCount),
+                      value: categoryController.catCount, page: const CategoryScreen()),
 
                     overViewWidget(msg: 'All SubCats', title: 'SubCats',
                         iconData: Icons.sort_by_alpha_outlined, color: Colors.limeAccent,
-                        value: categoryController.allCatCount),
+                        value: categoryController.allCatCount, page: const SubCategoryScreen()),
 
                     overViewWidget(msg: 'All Products', title: 'Products',
                         iconData: Icons.shop_2_outlined, color: Colors.white38,
-                        value: productController.allProdCount),
+                        value: productController.allProdCount, page: const ProductScreen()),
 
                     overViewWidget(msg: 'All Orders', title: 'Orders',
                         iconData: Icons.shopping_basket_outlined, color: Colors.green,
-                        value: productController.orderCount),
+                        value: orderController.orderCount, page: const OrderScreen()),
 
                     overViewWidget(msg: 'All Coupons', title: 'Coupons',
                         iconData: Icons.card_giftcard_outlined, color: Colors.deepOrange,
-                        value: productController.couponCount),
+                        value: productController.couponCount, page: const CouponScreen()),
 
                     overViewWidget(msg: 'All Users', title: 'Users',
                         iconData: Icons.person_outline, color: Colors.tealAccent,
-                        value: productController.userCount),
+                        value: productController.userCount, page: const HomeScreen()),
 
                     const SizedBox(height: 35.0),
                   ],
@@ -478,7 +513,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget overViewWidget({required String msg, required String title,
+  Widget overViewWidget({required String msg, required String title, required var page,
         required IconData iconData, required Color color, required RxInt value}){
     return Padding(
         padding: const EdgeInsets.all(5.0),
@@ -489,7 +524,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: TextButton.icon(
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const CouponScreen()));
+                        builder: (context) => page));
                   },
                   icon: Icon(iconData, color: color),
                   label: Text(title,
@@ -549,6 +584,21 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     ),
   );
+
+  final snackBarNetworkError = SnackBar(
+    content: const Text('Oops! Internet Connection Error!', style: TextStyle(color: Colors.white)),
+    backgroundColor: (Colors.red),
+    action: SnackBarAction(
+      label: 'Dismiss',
+      textColor: Colors.black,
+      onPressed: () {
+      },
+    ),
+  );
+
+  subscribeToRealTime(){
+
+  }
 }
 
 

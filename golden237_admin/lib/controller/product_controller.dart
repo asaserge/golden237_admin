@@ -10,53 +10,35 @@ class ProductController extends GetxController{
   RxInt prodCount = 0.obs;
   RxInt allProdCount = 0.obs;
   RxInt couponCount = 0.obs;
-  RxInt orderCount = 0.obs;
   RxInt userCount = 0.obs;
+  RxString searchWord = ''.obs;
 
   //To persist the cart state manager`
   @override
   void onInit() {
     super.onInit();
+    getProductByRecent();
     fetchProductTableCount();
-    fetchOrderTableCount();
     fetchCouponTableCount();
     fetchUserTableCount();
   }
 
-  getProductAsc() async{
-    return await Apis.client
-        .from('product')
-        .select().order('name', ascending: true);
-  }
-
-  getProductDes() async{
-    return await Apis.client
-        .from('product')
-        .select().order('name', ascending: false);
-  }
-
-  getProductLH() async{
-    return await Apis.client
-        .from('product')
-        .select().order('price', ascending: true);
-  }
-
-  getProductHL() async{
-    return await Apis.client
-        .from('product')
-        .select().order('price', ascending: false);
-  }
-
   getProductByRecent() async{
-    return await Apis.client
+    final res = await Apis.client
         .from('product')
-        .select().order('created_at', ascending: true);
+        .select('*, category(*)')
+        .order('created_at', ascending: false);
+    print('\n\n\$${res.toString()}');
+    return res;
   }
 
-  getProductByPast() async{
-    return await Apis.client
+  getProductSearch() async{
+    final res = await Apis.client
         .from('product')
-        .select().order('created_at', ascending: false);
+        .select('*, category(*)')
+        ..textSearch('description', "'${searchWord.value}'");
+    print('\n\n\$${res.toString()}');
+    return res;
   }
 
   getOrders() async{
@@ -77,12 +59,6 @@ class ProductController extends GetxController{
         .select('*', const FetchOptions(count: CountOption.exact) );
     allProdCount.value = res.count;
     prodCount.value = res.count;
-  }
-
-  fetchOrderTableCount() async{
-    final res = await Apis.client.from('order')
-        .select('*', const FetchOptions(count: CountOption.exact) );
-    orderCount.value = res.count;
   }
 
   fetchCouponTableCount() async{

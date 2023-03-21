@@ -1,21 +1,18 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:golden237_admin/screens/modify_product.dart';
 import 'package:golden237_admin/screens/product_detail_screen.dart';
 import 'package:intl/intl.dart';
 
 import '../services/apis.dart';
 import '../utils/constants.dart';
-import '../utils/helpers.dart';
-import 'color_widget.dart';
 
 class ProductWidget extends StatefulWidget {
   const ProductWidget({Key? key, required this.productSnapshot,
-  required this.index, required this.subCat}) : super(key: key);
+  required this.index}) : super(key: key);
   final AsyncSnapshot productSnapshot;
   final int index;
-  final String subCat;
 
   @override
   State<ProductWidget> createState() => _ProductWidgetState();
@@ -23,7 +20,6 @@ class ProductWidget extends StatefulWidget {
 
 class _ProductWidgetState extends State<ProductWidget> {
 
-  Helper helper = Helper();
   bool isLoading = false;
   final decimalFormatter = NumberFormat('#.#');
 
@@ -32,8 +28,10 @@ class _ProductWidgetState extends State<ProductWidget> {
     final Size size = MediaQuery.of(context).size;
 
     return GestureDetector(
-      onLongPress: (){
-        //helper.showOptionDialog(context, 1);
+      onTap: (){
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) =>
+            ProductDetailScreen(productSnapshot: widget.productSnapshot,
+              index: widget.index)));
       },
       child: Container(
         height: size.height / 4.8,
@@ -62,12 +60,14 @@ class _ProductWidgetState extends State<ProductWidget> {
                       borderRadius: BorderRadius.circular(10.0),
                       image: DecorationImage(
                         image: NetworkImage(widget.productSnapshot.data[widget.index]['image']),
-                        fit: BoxFit.contain,
+                        fit: BoxFit.cover,
                         // colorFilter:
                         // const ColorFilter.mode(Colors.white70, BlendMode.colorBurn)
                       ),
                     ),
                   ),
+                  placeholder: (context, url) => Image.asset('assets/images/no-image.jpg',
+                      height: size.height / 4.8, width: size.width / 2.5),
                   errorWidget: (context, url, error) => const Icon(Icons.error),
                 ),
                 Positioned(
@@ -117,29 +117,29 @@ class _ProductWidgetState extends State<ProductWidget> {
               ],
             ),
             const SizedBox(width: 8.0),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(widget.productSnapshot.data[widget.index]['name'], maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 16.0)),
-                  Text('XAF ${widget.productSnapshot.data[widget.index]['price']}', style: const TextStyle(
-                      fontSize: 18.0, color: primaryColor, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8.0),
-                  //widget.productData[index].map(_buildCat).toList(),
-                  Text(widget.subCat, maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 14.0)),
-                  const SizedBox(height: 3.0),
-                  Text('Brand: ${widget.productSnapshot.data[widget.index]['brand']}', maxLines: 1,
-                      overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14.0)),
-                  const SizedBox(height: 3.0),
-                  Text('Size: ${widget.productSnapshot.data[widget.index]['size']}', maxLines: 1,
-                      overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14.0)),
-                  const SizedBox(height: 3.0),
-                  Text('SKU: ${widget.productSnapshot.data[widget.index]['sku']}', style: const TextStyle(fontSize: 14.0)),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: size.width / 2.4,
+                  child: Text(widget.productSnapshot.data[widget.index]['name'], maxLines: 1, overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 15.0)),
+                ),
+                Text('XAF ${widget.productSnapshot.data[widget.index]['price']}', style: const TextStyle(
+                    fontSize: 18.0, color: primaryColor, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8.0),
+                Text('Cat: ${widget.productSnapshot.data[widget.index]['category']['name']}', maxLines: 1, overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 14.0)),
+                const SizedBox(height: 3.0),
+                Text('Brand: ${widget.productSnapshot.data[widget.index]['brand']}', maxLines: 1,
+                    overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14.0)),
+                const SizedBox(height: 3.0),
+                Text('Size: ${widget.productSnapshot.data[widget.index]['size']}', maxLines: 1,
+                    overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14.0)),
+                const SizedBox(height: 3.0),
+                Text('SKU: ${widget.productSnapshot.data[widget.index]['sku']}', style: const TextStyle(fontSize: 14.0)),
 
-                ],
-              ),
+              ],
             ),
 
             Column(
@@ -170,63 +170,69 @@ class _ProductWidgetState extends State<ProductWidget> {
     );
   }
 
-  showDeleteDialog(AsyncSnapshot obj, int index){
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        content: SingleChildScrollView(
-          child: Column(
-            children: [
-              Text('Are you sure you want to delete ${obj.data[index]['name']}'),
-              const SizedBox(height: 20.0),
-              Visibility(
-                  visible: isLoading,
-                  child: const CircularProgressIndicator(strokeWidth: 3, color: primaryColor)
-              )
-            ],
+
+  showDeleteBottomSheet(AsyncSnapshot snap, int index){
+    showModalBottomSheet(
+        context: context,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(20),
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: (){
-              Navigator.of(ctx).pop();
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5)
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        builder: (context) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 30.0),
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Text('Are you sure you want to delete ${snap.data[index]['name']}?'
+                    , style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               ),
-              child: const Text("Cancel", style: TextStyle(color: Colors.black54)),
-            ),
-          ),
+              const SizedBox(height: 18.0),
+              Image.asset('assets/icons/warning.png'),
+              const SizedBox(height: 10.0),
 
-          TextButton(
-            onPressed: () async{
-              setState(() {
-                isLoading = !isLoading;
-              });
-              await Apis.client.from('category').delete().eq('id', obj.data[index]['id'])
-                  .then((value) {
-                Navigator.of(ctx).pop();
-                setState(() {
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  GestureDetector(
+                    onTap: (){
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+                  ),
 
-                });
-                return snackBarFailed;
-              });
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5),
-                color: primaryColor,
+                  const SizedBox(width: 60.0),
+
+                  GestureDetector(
+                    onTap: (){
+
+                      deleteProductMethod(snap, index);
+                      Navigator.of(context).pop();
+                      showBottomSnackBarMsg(context, 'Success!', '${snap.data[index]['name']}'
+                          ' has been deleted successfully!', Colors.green);
+
+                    },
+                    child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            color: primaryColor
+                        ),
+                        child: const Text('Delete', style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
+
+                  const SizedBox(width: 30.0),
+                ],
               ),
-              child: const Text("Delete", style: TextStyle(color: Colors.black54)),
-            ),
-          ),
-        ],
-      ),
-    );
+              const SizedBox(height: 25.0),
+            ],
+
+          );
+        });
   }
 
   showMoreOptions(AsyncSnapshot snap, int index){
@@ -249,24 +255,11 @@ class _ProductWidgetState extends State<ProductWidget> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15.0),
                 child: Text(snap.data[index]['description'], maxLines: 6, overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w300)),
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w300)),
               ),
-              const SizedBox(height: 12.0),
-              ListTile(
-                leading: Container(
-                    padding: const EdgeInsets.all(6.0),
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Colors.green
-                    ),
-                    child: const Icon(Icons.edit_outlined, color: Colors.white, size: 20.0,)
-                ),
-                title: const Text('Edit product'),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              const SizedBox(height: 12.0),
+
+              const SizedBox(height: 10.0),
+
               ListTile(
                 leading: Container(
                     padding: const EdgeInsets.all(6.0),
@@ -276,12 +269,16 @@ class _ProductWidgetState extends State<ProductWidget> {
                     ),
                     child: const Icon(Icons.delete_outline, color: Colors.white, size: 20.0,)
                 ),
-                title: const Text('Delete product'),
+                title: const Text('Delete Product'),
                 onTap: () {
                   Navigator.pop(context);
+                  showDeleteBottomSheet(snap, index);
                 },
               ),
-              const SizedBox(height: 12.0),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Divider(thickness: 1, color: Colors.grey),
+              ),
               ListTile(
                 leading: Container(
                     padding: const EdgeInsets.all(6.0),
@@ -289,40 +286,68 @@ class _ProductWidgetState extends State<ProductWidget> {
                         borderRadius: BorderRadius.circular(5.0),
                         color: Colors.yellow
                     ),
-                    child: const Icon(Icons.more_outlined, color: Colors.white, size: 20.0,)
+                    child: const Icon(Icons.more_outlined, color: Colors.black, size: 20.0,)
                 ),
-                title: const Text('More about'),
+                title: const Text('More About'),
                 onTap: () {
                   Navigator.pop(context);
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) =>
+                      ProductDetailScreen(productSnapshot: widget.productSnapshot,
+                          index: widget.index)));
                 },
               ),
-              const SizedBox(height: 12.0),
+              const SizedBox(height: 15.0),
+              ListTile(
+                leading: Container(
+                    padding: const EdgeInsets.all(6.0),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.0),
+                        color: Colors.green
+                    ),
+                    child: const Icon(Icons.edit_outlined, color: Colors.white, size: 20.0,)
+                ),
+                title: const Text('Edit Product'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) =>
+                      ModifyProduct(productSnapshot: widget.productSnapshot,
+                          index: widget.index)));
+                },
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Divider(thickness: 1, color: Colors.grey),
+              ),
             ],
 
           );
         });
   }
 
-  final snackBarFailed = SnackBar(
-    content: const Text('Oops! Something went wrong!', style: TextStyle(color: Colors.white)),
-    backgroundColor: (Colors.red),
-    action: SnackBarAction(
-      label: 'Dismiss',
-      textColor: Colors.black,
-      onPressed: () {
-      },
-    ),
-  );
+  showBottomSnackBarMsg(BuildContext context, String title, String msg, Color color){
+    final snackBar = SnackBar(
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 10.0),
+          Text(title, style: const TextStyle(color: Colors.white, fontSize: 20)),
+          const SizedBox(height: 5.0),
+          Text(msg, style: const TextStyle(color: Colors.white)),
+        ],
+      ),
+      duration: const Duration(seconds: 4),
+      backgroundColor: (color),
+      dismissDirection: DismissDirection.down,
+    );
+    return ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 
-  final snackBarSucceed = SnackBar(
-    content: const Text('Success! Transaction successful!', style: TextStyle(color: Colors.white)),
-    backgroundColor: (Colors.green),
-    action: SnackBarAction(
-      label: 'Dismiss',
-      textColor: Colors.black,
-      onPressed: () {
-      },
-    ),
-  );
-
+  deleteProductMethod(var obj, int index) async{
+    final res = await Apis.client.from('product').delete().eq('id', obj.data[index]['id']);
+    setState(() {
+      isLoading = !isLoading;
+    });
+    return res;
+  }
 }

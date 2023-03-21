@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:golden237_admin/screens/add_product.dart';
+import 'package:golden237_admin/screens/modify_product.dart';
 import 'package:golden237_admin/screens/home_screen.dart';
 import 'package:golden237_admin/screens/product_detail_screen.dart';
+import 'package:golden237_admin/screens/searchbar_screen.dart';
 import 'package:intl/intl.dart';
 
 import '../controller/product_controller.dart';
@@ -27,18 +28,6 @@ class _ProductScreenState extends State<ProductScreen> {
   final formatter = NumberFormat('#,###');
   bool isLoading = false;
 
-  // Initial Selected Value
-  String dropValue = 'Latest';
-
-  var items = [
-    'Latest',
-    'Oldest',
-    'Ascending',
-    'Descending',
-    'Low to High',
-    'High to Low',
-  ];
-
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -49,29 +38,26 @@ class _ProductScreenState extends State<ProductScreen> {
 
           actions: [
 
-            DropdownButton<String>(
-              value: dropValue,
-              icon: const Icon(Icons.keyboard_arrow_down),
-              // Array list of items
-              items: items.map((String items) {
-                return DropdownMenuItem(
-                  value: items,
-                  child: Text(items),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  dropValue = newValue!;
-                });
+            IconButton(
+              onPressed: (){
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const SearchbarScreen()));
               },
+              icon: const Icon(Icons.search_outlined),
             ),
 
             const SizedBox(width: 25),
 
             Obx(() => Padding(
                 padding: const EdgeInsets.only(top: 21.0, right: 25.0),
-                child: Text('(${productController.allProdCount.value})')
-            )
+                child: Text('(${productController.allProdCount.value})'))
+            ),
+
+            IconButton(
+              onPressed: (){
+                setState(() {});
+              },
+              icon: const Icon(Icons.refresh_outlined)
             ),
 
             const SizedBox(width: 10.0)
@@ -79,12 +65,7 @@ class _ProductScreenState extends State<ProductScreen> {
         ),
 
         body: FutureBuilder(
-            future: dropValue == "Latest" ? productController.getProductByRecent() :
-            dropValue == "Oldest" ? productController.getProductByPast() :
-            dropValue == "Ascending" ? productController.getProductAsc() :
-            dropValue == "Descending" ? productController.getProductDes() :
-            dropValue == "Low to High" ? productController.getProductLH() :
-            productController.getProductHL(),
+            future: productController.getProductByRecent() ,
             builder: (context, snapshot){
               if(snapshot.hasError) {
                 return Center(
@@ -115,16 +96,26 @@ class _ProductScreenState extends State<ProductScreen> {
 
 
         floatingActionButton:  CustomFabWidget(
-          route: AddProduct(option: 'add',), text: 'Product', width: 120.0,)
+          route: ModifyProduct(), text: 'Product', width: 120.0,)
     );
   }
 
   Widget loadingProduct(AsyncSnapshot snap){
-   return ListView.builder(
+   return snap.data.length == 0 ?
+   Center(
+     child: Column(
+       mainAxisAlignment: MainAxisAlignment.center,
+       children: [
+         Image.asset('assets/icons/icons-not-found.png'),
+         const SizedBox(height: 15.0),
+         const Text('No delivered item yet!')
+       ],
+     ),
+      ) :
+     ListView.builder(
        itemCount: snap.data.length,
        itemBuilder: (context, index){
-         return ProductWidget(productSnapshot: snap,
-             index: index, subCat: snap.data[index]['name']);
+         return ProductWidget(productSnapshot: snap, index: index);
        }
    );
   }

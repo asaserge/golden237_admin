@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class HelpScreen extends StatelessWidget {
   const HelpScreen({super.key});
@@ -33,11 +32,6 @@ class HelpScreen extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     "Please read the following instructions",
-                    style: GoogleFonts.aBeeZee(
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.w700,
-                      wordSpacing: 1.0,
-                    ),
                   ),
                   SizedBox(
                     height: 25.0,
@@ -58,10 +52,6 @@ class HelpScreen extends StatelessWidget {
                       "Adding a schedule is easy. Go to the add schedule page from the management menu. "
                       "Fill all the required fields and click the add schedule button.",
                       textAlign: TextAlign.justify,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w400,
-                      ),
                     ),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 5.0),
@@ -72,10 +62,6 @@ class HelpScreen extends StatelessWidget {
                         "all times. You must always enter the first class price. The rest will be "
                         "calculated automatically.",
                         textAlign: TextAlign.justify,
-                        style: GoogleFonts.montserrat(
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w600,
-                        ),
                       ),
                     ),
                   ),
@@ -95,10 +81,6 @@ class HelpScreen extends StatelessWidget {
                       "press and hold on the schedule you want to delete. An alert box will pop-up "
                       "asking you to confirm the deletion process. Click YES to proceed and NO to cancel.",
                       textAlign: TextAlign.justify,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w400,
-                      ),
                     ),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 5.0),
@@ -106,10 +88,6 @@ class HelpScreen extends StatelessWidget {
                         "IMPORTANT : You can't update a schedule. So, if you made any mistake, you have "
                         "to delete that schedule and start again from scratch.",
                         textAlign: TextAlign.justify,
-                        style: GoogleFonts.montserrat(
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w600,
-                        ),
                       ),
                     ),
                   ),
@@ -128,10 +106,6 @@ class HelpScreen extends StatelessWidget {
                       "Go to the add journey page from the management page. Type the journey "
                       "and press OK.",
                       textAlign: TextAlign.justify,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w400,
-                      ),
                     ),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 5.0),
@@ -139,10 +113,6 @@ class HelpScreen extends StatelessWidget {
                         "IMPORTANT : The journey name must always contain the departing station "
                         "name and the arrival station name. (ex: Colombo - Kandy)",
                         textAlign: TextAlign.justify,
-                        style: GoogleFonts.montserrat(
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w600,
-                        ),
                       ),
                     ),
                   ),
@@ -162,10 +132,6 @@ class HelpScreen extends StatelessWidget {
                       "journey you want to delete. An alert box will pop-up asking you to confirm "
                       "the deletion. Click YES to proceed and NO to cancel.",
                       textAlign: TextAlign.justify,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w400,
-                      ),
                     ),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 5.0),
@@ -173,10 +139,6 @@ class HelpScreen extends StatelessWidget {
                         "IMPORTANT : You can't edit a journey. If you make a mistake, you have to delete "
                         "and add it again.",
                         textAlign: TextAlign.justify,
-                        style: GoogleFonts.montserrat(
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w600,
-                        ),
                       ),
                     ),
                   ),
@@ -195,10 +157,6 @@ class HelpScreen extends StatelessWidget {
                       "Go to the add train page from the management page. Type the train name "
                       "and press OK.",
                       textAlign: TextAlign.justify,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w400,
-                      ),
                     ),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 5.0),
@@ -206,11 +164,6 @@ class HelpScreen extends StatelessWidget {
                         "IMPORTANT : Only the luxurious and express trains must be entered. And these "
                         "must be the ones that passengers are allowed reserve tickets in.",
                         textAlign: TextAlign.justify,
-                        style: GoogleFonts.montserrat(
-                          // color: Colors.blueGrey[600],
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w600,
-                        ),
                       ),
                     ),
                   ),
@@ -230,11 +183,6 @@ class HelpScreen extends StatelessWidget {
                       "train you want to delete. An alert box will pop-up asking you to confirm "
                       "the deletion. Click YES to proceed and NO to cancel.",
                       textAlign: TextAlign.justify,
-                      style: GoogleFonts.montserrat(
-                        // color: Colors.blueGrey[600],
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w400,
-                      ),
                     ),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 5.0),
@@ -242,11 +190,6 @@ class HelpScreen extends StatelessWidget {
                         "IMPORTANT : You can't edit a train name. If you make a mistake, you have to delete "
                         "and add it again.",
                         textAlign: TextAlign.justify,
-                        style: GoogleFonts.montserrat(
-                          // color: Colors.blueGrey[600],
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w600,
-                        ),
                       ),
                     ),
                   ),
@@ -266,11 +209,6 @@ class HelpScreen extends StatelessWidget {
                       "These schedules will not be valid after their actual departure date. "
                       "You must delete the outdated schedules as soon as possible.",
                       textAlign: TextAlign.justify,
-                      style: GoogleFonts.montserrat(
-                        // color: Colors.blueGrey[600],
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w400,
-                      ),
                     ),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 5.0),
@@ -278,11 +216,6 @@ class HelpScreen extends StatelessWidget {
                         "IMPORTANT : Deleting a schedule as soon as the train leaves the station is "
                         "prefferable. You must add new schedules evryday.",
                         textAlign: TextAlign.justify,
-                        style: GoogleFonts.montserrat(
-                          // color: Colors.blueGrey[600],
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w600,
-                        ),
                       ),
                     ),
                   ),
@@ -302,11 +235,6 @@ class HelpScreen extends StatelessWidget {
                       "number of users, the number of schedules, the number of trains and journeys as well "
                       "as the number of bookings.",
                       textAlign: TextAlign.justify,
-                      style: GoogleFonts.montserrat(
-                        // color: Colors.blueGrey[600],
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w400,
-                      ),
                     ),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 5.0),
@@ -314,11 +242,6 @@ class HelpScreen extends StatelessWidget {
                         "IMPORTANT : The dashboard updates everytime you open the dashboard. The revenue "
                         "indicates the total income from the reservations.",
                         textAlign: TextAlign.justify,
-                        style: GoogleFonts.montserrat(
-                          // color: Colors.blueGrey[600],
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w600,
-                        ),
                       ),
                     ),
                   ),

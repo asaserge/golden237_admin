@@ -9,6 +9,7 @@ class CategoryController extends GetxController {
   RxInt catCount = 0.obs;
   RxInt allCatCount = 0.obs;
   RxInt subCatCount = 0.obs;
+  final category = [].obs;
 
   @override
   void onInit() {
@@ -20,8 +21,10 @@ class CategoryController extends GetxController {
   }
 
   getMainCategory() async{
-    return await Apis.client.from('category')
+    final res = await Apis.client.from('category')
         .select().order('name', ascending: false);
+    category.value = res;
+    return res;
   }
 
   getSubCategory() async{

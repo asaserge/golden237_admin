@@ -2,46 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 
 // light theme
-ThemeData light = ThemeData(
+ThemeData lightTheme  = ThemeData(
+  primarySwatch: Colors.orange,
+  primaryColor: Colors.white,
   brightness: Brightness.light,
-  appBarTheme: AppBarTheme(color: Colors.white.withOpacity(0.1)),
-  scaffoldBackgroundColor: Colors.white.withOpacity(0.91),
+  backgroundColor: const Color(0xFFE5E5E5),
+  dividerColor: Colors.white54,
 );
 
 // dark theme
-ThemeData dark = ThemeData(
+ThemeData darkTheme  = ThemeData(
+  primaryColor: Colors.black,
   brightness: Brightness.dark,
-  iconTheme: const IconThemeData(color: Colors.white),
+  backgroundColor: const Color(0xFF212121),
+  dividerColor: Colors.black12,
 );
-
-class ThemeNotifier extends ChangeNotifier {
-  final String key = "theme";
-  final storage = GetStorage();
-  bool _isDark = true;
-
-// getter
-  bool get isDark => _isDark;
-
-  ThemeNotifier() {
-    _isDark = true; // default value
-    _loadFromPrefs();
-  }
-
-// function to change the theme
-  toggleTheme() {
-    _isDark = !_isDark;
-    _savedToPrefs();
-    notifyListeners();
-  }
-
-// loading saved preferences
-  _loadFromPrefs() {
-    _isDark = storage.read(key) ?? true;
-    notifyListeners();
-  }
-
-// saving to preferences
-  _savedToPrefs() {
-    storage.write(key, _isDark);
-  }
-}
