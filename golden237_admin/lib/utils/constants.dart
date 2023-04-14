@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 const Color primaryColor = Colors.orange;
+const String appName = 'Golden 237 Ecommerce';
 
 final colorList = <Color>[
   const Color(0xfffdcb6e),

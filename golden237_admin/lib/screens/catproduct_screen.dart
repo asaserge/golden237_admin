@@ -1,22 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:golden237_admin/screens/modify_product.dart';
-import 'package:golden237_admin/screens/home_screen.dart';
-import 'package:golden237_admin/screens/product_detail_screen.dart';
 import 'package:intl/intl.dart';
 
+import '../controller/category_controller.dart';
 import '../controller/product_controller.dart';
 import '../utils/constants.dart';
 import '../utils/helpers.dart';
-import '../widgets/color_widget.dart';
-import '../widgets/custom_fab_widget.dart';
 import '../widgets/product_widget.dart';
 
 class CatProductScreen extends StatefulWidget {
-  const CatProductScreen({Key? key,
-    required this.subCatSnap, required this.index, required subCat}) : super(key: key);
-  final AsyncSnapshot subCatSnap;
-  final int index;
+  const CatProductScreen({Key? key}) : super(key: key);
 
   @override
   State<CatProductScreen> createState() => _CatProductScreenState();
@@ -25,10 +18,11 @@ class CatProductScreen extends StatefulWidget {
 class _CatProductScreenState extends State<CatProductScreen> {
 
   Helper helper = Helper();
-  int productCounter = 0;
   final ProductController productController = Get.find();
+  final CategoryController categoryController = Get.find();
   final formatter = NumberFormat('#,###');
   bool isLoading = false;
+  final data = Get.arguments;
 
   @override
   Widget build(BuildContext context) {
@@ -36,14 +30,13 @@ class _CatProductScreenState extends State<CatProductScreen> {
     });
     return Scaffold(
         appBar: AppBar(
-          title: Text('${widget.subCatSnap.data[widget.index]['name']} Products', style: const TextStyle(fontSize: 18)),
+          title: Text('dfgfdgdfgfd Products',
+              style: const TextStyle(fontSize: 18)),
 
           actions: [
-
-
             Obx(() => Padding(
                 padding: const EdgeInsets.only(top: 22.0, right: 20.0),
-                child: Text('(${productController.prodCount.value})'))
+                child: Text('(${categoryController.mainCategoriesList.length})'))
             ),
 
             const SizedBox(width: 10.0)
@@ -51,7 +44,7 @@ class _CatProductScreenState extends State<CatProductScreen> {
         ),
 
         body: FutureBuilder(
-            future: productController.getCategorisedProducts(widget.subCatSnap.data[widget.index]['id']),
+            future: productController.getCategorisedProducts(data['id']),
             builder: (context, snapshotProd){
               if(snapshotProd.hasError) {
                 return Center(
@@ -85,15 +78,12 @@ class _CatProductScreenState extends State<CatProductScreen> {
   }
 
   Widget allocatedWidget(AsyncSnapshot snap){
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      productController.prodCount.value = snap.data.length;
-    });
-    if(snap.data.length == 0){
+    if(categoryController.subCategoriesList.isEmpty){
       return Center(
         child: Container(
           padding: const EdgeInsets.all(10.0),
           color: Colors.white,
-          child: Text('Oops! No product found for ${widget.subCatSnap.data[widget.index]['name']} category!',
+          child: Text('Oops! No product found for dsfvdsfds category!',
               style: const TextStyle(color: Colors.green)
           ),
         ),

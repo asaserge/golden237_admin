@@ -8,7 +8,7 @@ class CustomFabWidget extends StatelessWidget {
   const CustomFabWidget({Key? key,
     required this.route, required this.text, required this.width
   }) : super(key: key);
-  final route;
+  final String route;
   final String text;
   final double width;
 
@@ -39,8 +39,7 @@ class CustomFabWidget extends StatelessWidget {
             ],
           ),
           onPressed: () {
-            Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => route));
+            Get.toNamed(route);
           },
         ),
       ),

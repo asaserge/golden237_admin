@@ -73,7 +73,7 @@ class _CouponScreenState extends State<CouponScreen> {
       ),
 
       floatingActionButton: CustomFabWidget(
-        route: AddCoupon(isAdd: true,), text: 'Coupon', width: 120.0,),
+        route: '', text: 'Coupon', width: 120.0,),
     );
   }
 

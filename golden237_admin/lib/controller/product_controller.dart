@@ -7,7 +7,8 @@ import '../services/apis.dart';
 
 class ProductController extends GetxController{
 
-  RxInt prodCount = 0.obs;
+  RxBool isLoading = false.obs;
+  var productList = [].obs;
   RxInt allProdCount = 0.obs;
   RxInt couponCount = 0.obs;
   RxInt userCount = 0.obs;
@@ -17,10 +18,27 @@ class ProductController extends GetxController{
   @override
   void onInit() {
     super.onInit();
+    getAllProduct();
+
     getProductByRecent();
-    fetchProductTableCount();
     fetchCouponTableCount();
     fetchUserTableCount();
+  }
+
+  getAllProduct() async {
+    try{
+      isLoading(true);
+      final res = await Apis
+          .client
+          .from('product')
+          .select('*, category(*)')
+          .order('created_at', ascending: false);
+      if(res != null){
+        productList.value = res;
+      }
+    } finally {
+      isLoading(false);
+    }
   }
 
   getProductByRecent() async{
@@ -37,7 +55,6 @@ class ProductController extends GetxController{
         .from('product')
         .select('*, category(*)')
         ..textSearch('description', "'${searchWord.value}'");
-    print('\n\n\$${res.toString()}');
     return res;
   }
 
@@ -52,13 +69,6 @@ class ProductController extends GetxController{
         .from('product')
         .select('*')
         .eq('category,', id);
-  }
-
-  fetchProductTableCount() async{
-    final res = await Apis.client.from('product')
-        .select('*', const FetchOptions(count: CountOption.exact) );
-    allProdCount.value = res.count;
-    prodCount.value = res.count;
   }
 
   fetchCouponTableCount() async{

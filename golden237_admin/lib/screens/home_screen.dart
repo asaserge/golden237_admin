@@ -1,6 +1,5 @@
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:golden237_admin/controller/product_controller.dart';
 import 'package:get/get.dart';
 
@@ -13,11 +12,11 @@ import 'package:golden237_admin/screens/subcategory_screen.dart';
 import 'package:golden237_admin/screens/user_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../controller/category_controller.dart';
 import '../controller/order_controller.dart';
 import '../services/apis.dart';
 import '../utils/constants.dart';
-import '../utils/messages.dart';
 import 'about_screen.dart';
 
 import 'category_screen.dart';
@@ -45,8 +44,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
+    startRealTime();
     super.initState();
+  }
+
+  startRealTime(){
+    Apis.client.channel('*').on(
+      RealtimeListenTypes.postgresChanges,
+      ChannelFilter(event: '*', schema: 'public'),
+          (payload, [ref]) {
+            productController.getAllProduct();
+            categoryController.getMainCategory();
+            categoryController.getSubCategory();
+        print('\n\n\nProduct Change received: ${payload.toString()}');
+      },
+    ).subscribe();
   }
 
 
@@ -65,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: const Icon(Icons.menu_outlined, size: 35),
         ),
 
-        title: const Text(appName, style: TextStyle(fontSize: 16)),
+        title: Text(appName, style: TextStyle(fontSize: 16)),
 
         actions: [
 
@@ -92,13 +104,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 elevation: 2,
               ),
               child: const Icon(Icons.notifications_outlined)
-          ),
-
-          IconButton(
-              onPressed: (){
-                Phoenix.rebirth(context);
-              },
-              icon: const Icon(Icons.refresh_outlined)
           ),
 
           IconButton(
@@ -337,7 +342,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               children: [
                                 Row(
                                   children: [
-                                    Obx(() => Text('${productController.allProdCount.value}',
+                                    Obx(() => Text('${productController.productList.length}',
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
                                             fontWeight: FontWeight.bold,
@@ -362,9 +367,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               radius: 27.0,
                               lineWidth: 5.0,
                               animation: true,
-                              percent: productController.allProdCount.value / 200,
+                              percent: productController.productList.length / 200,
                               center: Text(
-                                "${((productController.allProdCount.value / 200) * 100).round()} %",
+                                "${((productController.productList.length / 200) * 100).round()} %",
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15.0),
@@ -390,7 +395,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               children: [
                                 Row(
                                   children: [
-                                    Obx(() => Text('${categoryController.allCatCount.value}',
+                                    Obx(() => Text('${categoryController.subCategoriesList.length}',
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
                                             fontWeight: FontWeight.bold,
@@ -415,9 +420,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               radius: 27.0,
                               lineWidth: 5.0,
                               animation: true,
-                              percent: categoryController.allCatCount.value / 50,
+                              percent: (categoryController.subCategoriesList.length).toDouble() / 50,
                               center: Text(
-                                "${((categoryController.allCatCount.value / 50) * 100).round()} %",
+                                "${((categoryController.subCategoriesList.length / 50) * 100).round()} %",
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 15.0),
@@ -463,6 +468,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 35.0),
 
+              SizedBox(height: 300),
+
               SizedBox(
                 height: MediaQuery.of(context).size.height / 1.5,
                 width: double.infinity,
@@ -476,29 +483,99 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   children: [
 
-                    overViewWidget(msg: 'All Categories', title: 'Categories',
-                      iconData: Icons.category_outlined, color: Colors.blue,
-                      value: categoryController.catCount, page: const CategoryScreen()),
 
-                    overViewWidget(msg: 'All SubCats', title: 'SubCats',
-                        iconData: Icons.sort_by_alpha_outlined, color: Colors.limeAccent,
-                        value: categoryController.allCatCount, page: const SubCategoryScreen()),
+                    Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: Card(
+                          child: ListTile(
+                              title: TextButton.icon(
+                                onPressed: () {
+                                  Get.toNamed('/category');
+                                },
+                                icon: const Icon(Icons.category_outlined, color: Colors.blue),
+                                label: const Text('Categories',
+                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                              ),
+                              subtitle: Obx(() => Text(
+                                categoryController.mainCategoriesList.isEmpty ? '0' :
+                                '${categoryController.mainCategoriesList.length}',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 60.0,
+                                ),
+                              )
+                            )
+                          ),
+                        ),
+                    ),
 
-                    overViewWidget(msg: 'All Products', title: 'Products',
-                        iconData: Icons.shop_2_outlined, color: Colors.white38,
-                        value: productController.allProdCount, page: const ProductScreen()),
+                    Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: Card(
+                          child: ListTile(
+                              title: TextButton.icon(
+                                onPressed: () {
+                                  Get.toNamed('/subcategory');
+                                },
+                                icon: const Icon(Icons.sort_by_alpha_outlined, color: Colors.limeAccent),
+                                label: const Text('SubCats',
+                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                              ),
+                              subtitle: Obx(() => Text(
+                                categoryController.subCategoriesList.isEmpty ? '0' :
+                                '${categoryController.subCategoriesList.length}',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 60.0,
+                                ),
+                              )
+                              )
+                          ),
+                        ),
+                    ),
 
-                    overViewWidget(msg: 'All Orders', title: 'Orders',
-                        iconData: Icons.shopping_basket_outlined, color: Colors.green,
-                        value: orderController.orderCount, page: const OrderScreen()),
+                    Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: Card(
+                          child: ListTile(
+                              title: TextButton.icon(
+                                onPressed: () {
+                                  Get.toNamed('/product');
+                                },
+                                icon: const Icon(Icons.shop_2_outlined, color: Colors.white38),
+                                label: const Text('Products',
+                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                              ),
+                              subtitle: Obx(() => Text(
+                                productController.productList.isEmpty ? '0' :
+                                '${productController.productList.length}',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 60.0,
+                                ),
+                              )
+                            )
+                          ),
+                        ),
+                    ),
 
-                    overViewWidget(msg: 'All Coupons', title: 'Coupons',
-                        iconData: Icons.card_giftcard_outlined, color: Colors.deepOrange,
-                        value: productController.couponCount, page: const CouponScreen()),
+                    SizedBox(height: 200),
 
-                    overViewWidget(msg: 'All Users', title: 'Users',
-                        iconData: Icons.person_outline, color: Colors.tealAccent,
-                        value: productController.userCount, page: const HomeScreen()),
+
+                    // overViewWidget(msg: 'All Orders', title: 'Orders',
+                    //     iconData: Icons.shopping_basket_outlined, color: Colors.green,
+                    //     value: orderController.orderCount, page: const OrderScreen()),
+                    //
+                    // overViewWidget(msg: 'All Coupons', title: 'Coupons',
+                    //     iconData: Icons.card_giftcard_outlined, color: Colors.deepOrange,
+                    //     value: productController.couponCount, page: const CouponScreen()),
+                    //
+                    // overViewWidget(msg: 'All Users', title: 'Users',
+                    //     iconData: Icons.person_outline, color: Colors.tealAccent,
+                    //     value: productController.userCount, page: const HomeScreen()),
 
                     const SizedBox(height: 35.0),
                   ],
@@ -513,8 +590,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget overViewWidget({required String msg, required String title, required var page,
-        required IconData iconData, required Color color, required RxInt value}){
+  Widget overViewWidget({required String msg, required String title, required String page,
+        required IconData iconData, required Color color, required, required RxInt value}){
     return Padding(
         padding: const EdgeInsets.all(5.0),
         child: Tooltip(
@@ -523,21 +600,20 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ListTile(
                 title: TextButton.icon(
                   onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => page));
+                    Get.to(page);
                   },
                   icon: Icon(iconData, color: color),
                   label: Text(title,
                       style: TextStyle(color: color, fontWeight: FontWeight.bold)),
                 ),
-                subtitle: Obx(() => Text(
-                  '${value.value}',
+                subtitle: Text(
+                  categoryController.subCategoriesList.isEmpty ? '0' : '$value',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: color,
-                    fontSize: 60.0,
-                  ),
-                ))
+                  color: color,
+                  fontSize: 60.0,
+                 ),
+                )
             ),
           ),
         )

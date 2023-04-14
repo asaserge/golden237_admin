@@ -15,9 +15,7 @@ import 'modify_category.dart';
 import 'modify_subcategory.dart';
 
 class SubCategoryScreen extends StatefulWidget {
-  const SubCategoryScreen({Key? key, this.catSnap, this.index}) : super(key: key);
-  final AsyncSnapshot? catSnap;
-  final int? index;
+  const SubCategoryScreen({Key? key}) : super(key: key);
 
   @override
   State<SubCategoryScreen> createState() => _SubCategoryScreenState();
@@ -27,17 +25,18 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
 
   Helper helper = Helper();
   bool isLoading = false;
-  final CategoryController controller = Get.find();
+  final CategoryController categoryController = Get.find();
+  final data = Get.arguments;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(widget.catSnap?.data[widget.index]['name'], style: const TextStyle(fontSize: 18)),
+          title: Text(data['name'], style: const TextStyle(fontSize: 18)),
           actions: [
             Obx(() => Padding(
                 padding: const EdgeInsets.only(top: 22.0),
-                child: Text('(${controller.subCatCount.value})'))
+                child: Text('(${categoryController.subCatCount.value})'))
             ),
             const SizedBox(width: 10.0),
             IconButton(
@@ -51,7 +50,7 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
         ),
 
         body: FutureBuilder(
-            future: controller.getSpecificSubCategory(widget.catSnap?.data[widget.index]['id']),
+            future: categoryController.getSpecificSubCategory(data['id']),
             builder: (context, snapshot){
               if(snapshot.hasError) {
                 return Center(
@@ -79,10 +78,6 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
             }
         ),
 
-        floatingActionButton: const CustomFabWidget(
-          route: ModifySubCategory(),
-          text: 'Subcategory', width: 120.0,
-        )
     );
   }
 
@@ -93,14 +88,15 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
           itemCount: snapshotSubCat.data.length ?? 0,
           itemBuilder: (context, index){
             WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-              controller.subCatCount.value = snapshotSubCat.data.length;
+              categoryController.subCatCount.value = snapshotSubCat.data.length;
             });
             return GestureDetector(
               onTap: (){
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => CatProductScreen(index: index,
-                        subCatSnap: snapshotSubCat, subCat: widget.catSnap?.data[widget.index]['name']))
-                );
+                // Navigator.of(context).push(MaterialPageRoute(
+                //     builder: (context) => CatProductScreen(index: index,
+                //         subCatSnap: snapshotSubCat, subCat: widget.catSnap?.data[widget.index]['name']))
+                // );
+                Get.toNamed('/cat_product', arguments: snapshotSubCat);
               },
               onLongPress: (){
 
@@ -250,10 +246,7 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
                 leading: const Icon(Icons.edit_outlined),
                 title: const Text('Edit'),
                 onTap: () {
-                  Navigator.pop(context);
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => ModifyCategory(snap: snap, index: index))
-                  );
+
                 },
               ),
               ListTile(

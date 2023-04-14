@@ -96,7 +96,7 @@ class _ProductScreenState extends State<ProductScreen> {
 
 
         floatingActionButton:  CustomFabWidget(
-          route: ModifyProduct(), text: 'Product', width: 120.0,)
+          route: '', text: 'Product', width: 120.0,)
     );
   }
 
