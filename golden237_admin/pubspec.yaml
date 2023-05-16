@@ -29,6 +29,7 @@ dependencies:
   flutter_local_notifications:
   percent_indicator: ^4.2.2
   smooth_star_rating: 1.1.1
+  fl_chart: ^0.61.0
 
 
 dev_dependencies:

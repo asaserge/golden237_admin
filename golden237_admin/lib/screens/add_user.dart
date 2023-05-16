@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
+import '../services/apis.dart';
 import '../widgets/custom_input.dart';
 import '../widgets/header_widget.dart';
 import '../widgets/submit_button.dart';
@@ -14,13 +16,21 @@ class AddUser extends StatefulWidget {
 class _AddUserState extends State<AddUser> {
 
   final TextEditingController _controllerEmail = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  final _formKeyUser = GlobalKey<FormState>();
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add User'),
+        title: const Text('Add User'),
+
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Text('Pending (0)'),
+          )
+        ],
       ),
 
       body: SingleChildScrollView(
@@ -37,7 +47,7 @@ class _AddUserState extends State<AddUser> {
               const SizedBox(height: 25),
 
               Form(
-                key: _formKey,
+                key: _formKeyUser,
                 child: CustomInput(
                   controller: _controllerEmail,
                   hintText: 'User\'s Email',
@@ -65,15 +75,26 @@ class _AddUserState extends State<AddUser> {
               SubmitButton(
                 text: 'Invite User',
                 isEnabled: true,
-                onPressed: () {
-                  if(_formKey.currentState!.validate()){
-                    //Todo invite user
+                isLoading: isLoading,
+                onPressed: () async{
+                  if(_formKeyUser.currentState!.validate()){
+                    Apis.client.auth.admin.inviteUserByEmail(_controllerEmail.text)
+                        .then((value) {
+                      Get.snackbar('Success!', 'An invite email has been sent to ${_controllerEmail.text} '
+                          'successfully!',
+                          borderRadius: 5, backgroundColor: Colors.green,
+                          colorText: Colors.white, duration: const Duration(seconds: 6));
+                      Navigator.of(context).pop();
+                    });
+                    setState(() {
+                      isLoading = false;
+                    });
+
                   }
                   else{
                     return;
                   }
                 },
-                isLoading: false,
               ),
 
               const SizedBox(height: 15),

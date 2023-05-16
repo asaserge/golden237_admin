@@ -9,7 +9,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/apis.dart';
 import '../utils/constants.dart';
 import '../widgets/custom_input.dart';
-import '../widgets/header_text.dart';
 import '../widgets/header_widget.dart';
 import '../widgets/submit_button.dart';
 
@@ -278,49 +277,53 @@ class _ModifyCategoryState extends State<ModifyCategory> {
     setState(() {
       _isLoading = !_isLoading;
     });
-    try{
-      if(_change){
-        final bytes = await imageFile?.readAsBytes();
-        final fileExt = imageFile?.path
-            .split('.')
-            .last;
-        final fileName = '${DateTime.now().toIso8601String()}.$fileExt';
-        final filePath = fileName;
-        await Apis.client.storage.from('category').uploadBinary(
-          filePath,
-          bytes!,
-        );
-        final imageUrlResponse = await Apis.client.storage
-            .from('category')
-            .createSignedUrl(filePath, 60 * 60 * 24 * 365 * 10);
-        await Apis.client
-            .from('category')
-            .update({
-          'name': _nameController.text,
-          'detail': _nameController.text,
-          'image': imageUrlResponse
-        });
-
+    if(_change){
+      try{
+          final bytes = await imageFile?.readAsBytes();
+          final fileExt = imageFile?.path
+              .split('.')
+              .last;
+          final fileName = '${DateTime.now().toIso8601String()}.$fileExt';
+          final filePath = fileName;
+          await Apis.client.storage.from('category').uploadBinary(
+            filePath,
+            bytes!,
+          );
+          final imageUrlResponse = await Apis.client.storage
+              .from('category')
+              .createSignedUrl(filePath, 60 * 60 * 24 * 365 * 10);
+          await Apis.client
+              .from('category')
+              .update({
+            'name': _nameController.text,
+            'detail': _nameController.text,
+            'image': imageUrlResponse
+          }).eq('id', data['id']);
+          Get.snackbar('Success!', '${data['name']} updated successfully!',
+              backgroundColor: Colors.green, colorText: Colors.white, borderRadius: 5);
+          Navigator.of(context).pop();
+          setState(() {
+            _change = false;
+          });
+      } catch(error){
+        Get.snackbar('Oops!', '${data['name']} failed to update!',
+            backgroundColor: Colors.green, colorText: Colors.white, borderRadius: 5);
       }
-      else{
-        await Apis.client
-            .from('category')
-            .update({
-          'name': _nameController.text,
-          'detail': _nameController.text,
-        });
-      }
+    }
+    else{
+      await Apis.client
+          .from('category')
+          .update({
+        'name': _nameController.text,
+        'detail': _nameController.text
+      }).eq('id', data['id']);
       Get.snackbar('Success!', '${data['name']} updated successfully!',
           backgroundColor: Colors.green, colorText: Colors.white, borderRadius: 5);
-      Get.back();
-    } catch(error){
-      Get.snackbar('Oops!', '${data['name']} failed to update!',
-          backgroundColor: Colors.green, colorText: Colors.white, borderRadius: 5);
+      Navigator.of(context).pop();
     }
     setState(() {
       _isLoading = !_isLoading;
     });
-    Get.back();
   }
 
 }

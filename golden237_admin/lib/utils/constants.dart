@@ -33,3 +33,12 @@ final dataMap = <String, double>{
   "Orders": 107,
   "Reviews": 109,
 };
+
+const sort = [
+'Default',
+'Latest',
+'Cheap',
+'Name',
+'Older',
+'Expensive',
+];

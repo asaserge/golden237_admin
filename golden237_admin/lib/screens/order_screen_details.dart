@@ -9,10 +9,7 @@ import '../controller/order_controller.dart';
 import '../utils/constants.dart';
 
 class OrderScreenDetails extends StatefulWidget {
-  const OrderScreenDetails({Key? key,
-  required this.oderDetailSnapshot, required this.index}) : super(key: key);
-  final AsyncSnapshot oderDetailSnapshot;
-  final int index;
+  const OrderScreenDetails({Key? key}) : super(key: key);
 
   @override
   State<OrderScreenDetails> createState() => _OrderScreenDetailsState();
@@ -31,24 +28,25 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
   final currencyFormatter = NumberFormat('#,###');
   OrderController orderController = Get.find();
   bool _isLoading = false;
+  final dynamic orderData = Get.arguments;
 
   @override
   void initState() {
     _controllerLat = TextEditingController();
     _controllerLon = TextEditingController();
-    if(widget.oderDetailSnapshot.data[widget.index]['status'] == 'Pending'){
+    if(orderData['status'] == 'Pending'){
       step2 = true;
     }
-    else if(widget.oderDetailSnapshot.data[widget.index]['status'] == 'Picked Up'){
+    else if(orderData['status'] == 'Picked Up'){
       step2 = true;
       step3 = true;
     }
-    else if(widget.oderDetailSnapshot.data[widget.index]['status'] == 'In Transit'){
+    else if(orderData['status'] == 'In Transit'){
       step2 = true;
       step3 = true;
       step4 = true;
     }
-    else if(widget.oderDetailSnapshot.data[widget.index]['status'] == 'Arrived'){
+    else if(orderData['status'] == 'Arrived'){
       step2 = true;
       step3 = true;
       step4 = true;
@@ -70,7 +68,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
     final Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Order #${widget.oderDetailSnapshot.data[widget.index]['number']}'),
+        title: Text('Order #${orderData['number']}'),
       ),
 
       body: SingleChildScrollView(
@@ -85,12 +83,12 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
                   Row(
                     children: [
                       const Text('Status: ', style: TextStyle(fontSize: 14)),
-                      Text(widget.oderDetailSnapshot.data[widget.index]['status'],
+                      Text(orderData['status'],
                           style: const TextStyle(fontSize: 14, color: primaryColor)),
                     ],
                   ),
                   Text(dateFormatter.format(DateTime.parse(
-                      widget.oderDetailSnapshot.data[widget.index]['created_at'])), style: const TextStyle(fontSize: 14)),
+                      orderData['created_at'])), style: const TextStyle(fontSize: 14)),
                 ],
               ),
 
@@ -112,7 +110,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
                             color: Colors.white,
                           ),
                           image: DecorationImage(
-                            image: NetworkImage(widget.oderDetailSnapshot.data[widget.index]['product']['image']),
+                            image: NetworkImage(orderData['product']['image']),
                             fit: BoxFit.cover,
                           )
                       ),
@@ -135,20 +133,20 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
                           const Text('Product Information',
                               style: TextStyle(fontSize: 15.0, color: Colors.green)),
                           const SizedBox(height: 8.0),
-                          Text('XAF ${currencyFormatter.format(widget.oderDetailSnapshot.data[widget.index]['product']['price'])}'
+                          Text('XAF ${currencyFormatter.format(orderData['product']['price'])}'
                               , style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 4.0),
-                          Text(widget.oderDetailSnapshot.data[widget.index]['product']['name'],
+                          Text(orderData['product']['name'],
                               style: const TextStyle(fontSize: 15.0)),
                           const SizedBox(height: 4.0),
 
-                          Text('Brand: ${widget.oderDetailSnapshot.data[widget.index]['product']['brand']}', style: const TextStyle(fontSize: 13.0)),
-                          Text('Quantity: ${widget.oderDetailSnapshot.data[widget.index]['quantity']}', style: const TextStyle(fontSize: 13.0)),
-                          Text('SKU: ${widget.oderDetailSnapshot.data[widget.index]['product']['sku']}', style: const TextStyle(fontSize: 13.0)),
-                          Text('Size: ${widget.oderDetailSnapshot.data[widget.index]['product']['size']}', style: const TextStyle(fontSize: 13.0)),
+                          Text('Brand: ${orderData['product']['brand']}', style: const TextStyle(fontSize: 13.0)),
+                          Text('Quantity: ${orderData['quantity']}', style: const TextStyle(fontSize: 13.0)),
+                          Text('SKU: ${orderData['product']['sku']}', style: const TextStyle(fontSize: 13.0)),
+                          Text('Size: ${orderData['product']['size']}', style: const TextStyle(fontSize: 13.0)),
                           const SizedBox(height: 8.0),
-                          Text('Subtotal XAF ${currencyFormatter.format(widget.oderDetailSnapshot.data[widget.index]['product']['price'] *
-                              widget.oderDetailSnapshot.data[widget.index]['quantity'])}', style: const TextStyle(fontSize: 15.0)),
+                          Text('Subtotal XAF ${currencyFormatter.format(orderData['product']['price'] *
+                              orderData['quantity'])}', style: const TextStyle(fontSize: 15.0)),
                           const SizedBox(height: 4.0),
                         ],
                       ),
@@ -161,7 +159,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
 
               const SizedBox(height: 10),
 
-              Text('Customer Note: ${widget.oderDetailSnapshot.data[widget.index]['note']}',
+              Text('Customer Note: ${orderData['note']}',
                   style: const TextStyle(fontSize: 14.0)),
               const SizedBox(height: 5.0),
 
@@ -174,7 +172,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  widget.oderDetailSnapshot.data[widget.index]['status'] != 'Delivered' ?
+                  orderData['status'] != 'Delivered' ?
                   const Text('Update Order Status', style: TextStyle(fontSize: 17.0,
                   fontWeight: FontWeight.w500, color: primaryColor)) :
                   const Text('Order has been marked Completed!', style: TextStyle(fontSize: 17.0,
@@ -185,7 +183,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
 
 
               Visibility(
-                visible: widget.oderDetailSnapshot.data[widget.index]['status'] != 'Delivered',
+                visible: orderData['status'] != 'Delivered',
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -219,7 +217,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
                                       step2 = true;
                                     });
                                     orderController.updateOrderStatus(
-                                        widget.oderDetailSnapshot.data[widget.index]['id'], 'Pending');
+                                        orderData['id'], 'Pending');
                                     ScaffoldMessenger.of(context).showSnackBar(snackBarUpdated);
                                   }
                                   else{
@@ -231,7 +229,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
                                         step2 = false;
                                       });
                                       orderController.updateOrderStatus(
-                                          widget.oderDetailSnapshot.data[widget.index]['id'], 'Confirmed');
+                                          orderData['id'], 'Confirmed');
                                       ScaffoldMessenger.of(context).showSnackBar(snackBarUpdated);
                                     }
                                   }
@@ -255,7 +253,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
                                         step3 = val!;
                                       });
                                       orderController.updateOrderStatus(
-                                          widget.oderDetailSnapshot.data[widget.index]['id'], 'Picked Up');
+                                          orderData['id'], 'Picked Up');
                                       ScaffoldMessenger.of(context).showSnackBar(snackBarUpdated);
                                     }
                                     else{
@@ -268,7 +266,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
                                         step3 = val!;
                                       });
                                       orderController.updateOrderStatus(
-                                          widget.oderDetailSnapshot.data[widget.index]['id'], 'Pending');
+                                          orderData['id'], 'Pending');
                                       ScaffoldMessenger.of(context).showSnackBar(snackBarUpdated);
                                     }
                                     else{
@@ -308,7 +306,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
                                       step6 = val!;
                                     });
                                     orderController.updateOrderStatus(
-                                        widget.oderDetailSnapshot.data[widget.index]['id'], 'Arrived');
+                                        orderData['id'], 'Arrived');
                                     ScaffoldMessenger.of(context).showSnackBar(snackBarUpdated);
                                   }
                                 }
@@ -331,7 +329,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
                                         step5 = val!;
                                       });
                                       orderController.updateOrderStatus(
-                                          widget.oderDetailSnapshot.data[widget.index]['id'], 'Arrived');
+                                          orderData['id'], 'Arrived');
                                       ScaffoldMessenger.of(context).showSnackBar(snackBarUpdated);
                                     }
                                     else{
@@ -344,7 +342,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
                                         step5 = val!;
                                       });
                                       orderController.updateOrderStatus(
-                                          widget.oderDetailSnapshot.data[widget.index]['id'], 'In Transit');
+                                          orderData['id'], 'In Transit');
                                       ScaffoldMessenger.of(context).showSnackBar(snackBarUpdated);
                                     }
                                     else{
@@ -371,7 +369,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
                                         step4 = val!;
                                       });
                                       orderController.updateOrderStatus(
-                                          widget.oderDetailSnapshot.data[widget.index]['id'], 'In Transit');
+                                          orderData['id'], 'In Transit');
                                       ScaffoldMessenger.of(context).showSnackBar(snackBarUpdated);
                                     }
                                     else{
@@ -384,7 +382,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
                                         step4 = val!;
                                       });
                                       orderController.updateOrderStatus(
-                                          widget.oderDetailSnapshot.data[widget.index]['id'], 'Picked Up');
+                                          orderData['id'], 'Picked Up');
                                       ScaffoldMessenger.of(context).showSnackBar(snackBarUpdated);
                                     }
                                     else{
@@ -420,7 +418,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
                             color: Colors.white,
                           ),
                           image: DecorationImage(
-                            image: NetworkImage(widget.oderDetailSnapshot.data[widget.index]['profiles']['avatar_url']),
+                            image: NetworkImage(orderData['profiles']['avatar_url']),
                             fit: BoxFit.cover,
                           )
                       ),
@@ -443,18 +441,18 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
                           const Text('Customer Information',
                               style: TextStyle(fontSize: 15.0, color: Colors.green)),
                           const SizedBox(height: 8.0),
-                          Text(widget.oderDetailSnapshot.data[widget.index]['profiles']['full_name'],
+                          Text(orderData['profiles']['full_name'] ?? '',
                               style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 4.0),
-                          Text('Phone: ${widget.oderDetailSnapshot.data[widget.index]['profiles']['phone']}', style: const TextStyle(fontSize: 13.0)),
+                          Text('Phone: ${orderData['profiles']['phone']}', style: const TextStyle(fontSize: 13.0)),
                           SizedBox(
                             width:  size.width / 2.5,
-                            child: Text('Home Address: ${widget.oderDetailSnapshot.data[widget.index]['address']}', maxLines: 2, overflow: TextOverflow.ellipsis,
+                            child: Text('Home Address: ${orderData['address']}', maxLines: 2, overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(fontSize: 13.0)),
                           ),
-                          Text('Payment ${widget.oderDetailSnapshot.data[widget.index]['payment']}', style: const TextStyle(fontSize: 13.0)),
+                          Text('Payment ${orderData['payment']}', style: const TextStyle(fontSize: 13.0)),
                           const SizedBox(height: 8.0),
-                          Text('Total XAF ${currencyFormatter.format(widget.oderDetailSnapshot.data[widget.index]['total'])}',
+                          Text('Total XAF ${currencyFormatter.format(orderData['total'])}',
                               style: const TextStyle(fontSize: 15.0)),
                           const SizedBox(height: 4.0),
                         ],
@@ -470,12 +468,12 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  widget.oderDetailSnapshot.data[widget.index]['status'] == 'Delivered' ?
+                  orderData['status'] == 'Delivered' ?
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text('Delivered to', style: TextStyle(fontSize: 11.0)),
-                      Text(widget.oderDetailSnapshot.data[widget.index]['address'], maxLines: 2, overflow: TextOverflow.ellipsis,
+                      Text(orderData['address'], maxLines: 2, overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontSize: 14.0)),
                     ],
                   ) :
@@ -483,7 +481,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text('Deliver to', style: TextStyle(fontSize: 11.0)),
-                      Text(widget.oderDetailSnapshot.data[widget.index]['address'], maxLines: 2, overflow: TextOverflow.ellipsis,
+                      Text(orderData['address'], maxLines: 2, overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontSize: 14.0)),
                     ],
                   ),
@@ -498,7 +496,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
 
 
               Visibility(
-                visible: widget.oderDetailSnapshot.data[widget.index]['status'] != 'Delivered',
+                visible: orderData['status'] != 'Delivered',
                 child: Column(
                   children: [
                     Row(
@@ -506,7 +504,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
                       children: [
                         GestureDetector(
                           onTap: (){
-                            _makePhoneCall(widget.oderDetailSnapshot.data[widget.index]['profiles']['phone']);
+                            _makePhoneCall(orderData['profiles']['phone']);
                           },
                           child: Container(
                             height: 45,
@@ -527,7 +525,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
                         ),
                         GestureDetector(
                           onTap: (){
-                            _makeWhatsApp(widget.oderDetailSnapshot.data[widget.index]['profiles']['phone']);
+                            _makeWhatsApp(orderData['profiles']['phone']);
                           },
                           child: Container(
                             height: 45,
@@ -557,7 +555,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
                       children: [
                         GestureDetector(
                           onTap: (){
-                            _sendEmail(widget.oderDetailSnapshot.data[widget.index]['profiles']['email']);
+                            _sendEmail(orderData['profiles']['email']);
                           },
                           child: Container(
                             height: 45,
@@ -658,7 +656,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
 
                   GestureDetector(
                     onTap: (){
-                      orderController.deleteOrders(widget.oderDetailSnapshot.data[widget.index]['id']);
+                      orderController.deleteOrders(orderData['id']);
                       ScaffoldMessenger.of(context).showSnackBar(snackBarSuccess);
                       setState(() {
                         _isLoading = false;
@@ -736,7 +734,7 @@ class _OrderScreenDetailsState extends State<OrderScreenDetails> with TickerProv
                   GestureDetector(
                     onTap: (){
                       orderController.updateOrderStatus(
-                          widget.oderDetailSnapshot.data[widget.index]['id'], 'Delivered');
+                          orderData['id'], 'Delivered');
                       ScaffoldMessenger.of(context).showSnackBar(snackBarUpdated);
                       Navigator.of(context).pop();
                       Navigator.of(context).pop();

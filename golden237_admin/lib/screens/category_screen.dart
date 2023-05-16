@@ -45,9 +45,18 @@ class _CategoryScreenState extends State<CategoryScreen> {
         ),
 
         body: Obx(() => categoryController.mainCategoriesList.isEmpty ?
-            const Center(
-              child: Text('No category available!')
-            ) :
+            Center(
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(10.0),
+                    color: Colors.white,
+                    child: const Text('Oops! No category was found!',
+                        style: TextStyle(color: Colors.green)
+                    ),
+                  ),
+                )
+              )
+            :
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
               child: ListView.builder(
@@ -56,7 +65,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 return GestureDetector(
                   onTap: (){
                     var data = categoryController.mainCategoriesList[index];
-                    Get.toNamed('/subcategory', arguments: data);
+                    Get.toNamed('/my_subcategory', arguments: data);
                   },
                   onLongPress: (){
                     var data = categoryController.mainCategoriesList[index];
@@ -156,7 +165,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 ],
               ),
               onPressed: () {
-                Get.toNamed('/modify_category');
+                Get.toNamed('/add_user');
               },
             ),
           ),
@@ -206,7 +215,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 30.0),
-              Text('More about ${data['name']}', style: const TextStyle(fontSize: 16)),
+              Text('More about ${data['name']}', maxLines: 1, overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 16)),
               const SizedBox(height: 12.0),
               ListTile(
                 leading: const Icon(Icons.edit_outlined),
@@ -247,7 +257,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   }
                 },
               ),
-              const SizedBox(height: 30.0),
+              const SizedBox(height: 40.0),
             ],
           );
         });

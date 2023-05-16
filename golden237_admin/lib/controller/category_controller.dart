@@ -21,10 +21,6 @@ class CategoryController extends GetxController {
     super.onInit();
     getMainCategory();
     getSubCategory();
-
-    getMainCategory();
-    getSubCategory();
-    fetchSubCategoryTableCount();
   }
 
 

@@ -1,15 +1,10 @@
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
+import 'package:golden237_admin/controller/auth_controller.dart';
 import 'package:golden237_admin/controller/product_controller.dart';
 import 'package:get/get.dart';
+import 'package:fl_chart/fl_chart.dart';
 
-import 'package:golden237_admin/screens/catproduct_screen.dart';
-import 'package:golden237_admin/screens/product_screen.dart';
-import 'package:golden237_admin/screens/searchbar_screen.dart';
-import 'package:golden237_admin/screens/settings_screen.dart';
-import 'package:golden237_admin/screens/coupon_screen.dart';
-import 'package:golden237_admin/screens/subcategory_screen.dart';
-import 'package:golden237_admin/screens/user_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -17,14 +12,7 @@ import '../controller/category_controller.dart';
 import '../controller/order_controller.dart';
 import '../services/apis.dart';
 import '../utils/constants.dart';
-import 'about_screen.dart';
 
-import 'category_screen.dart';
-import 'dev_screen.dart';
-import 'help.dart';
-import 'login_screen.dart';
-import 'notification_screen.dart';
-import 'order_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -38,13 +26,15 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> scaffoldKey  = GlobalKey();
   ProductController productController = Get.put(ProductController());
   OrderController orderController = Get.put(OrderController());
+  AuthController authController = Get.put(AuthController());
   final CategoryController categoryController = Get.put(CategoryController());
   final DateFormat formatDate = DateFormat.yMMMMEEEEd();
-  String name = '';
+  late bool isShowingMainData;
 
   @override
   void initState() {
     startRealTime();
+    isShowingMainData = true;
     super.initState();
   }
 
@@ -56,11 +46,26 @@ class _HomeScreenState extends State<HomeScreen> {
             productController.getAllProduct();
             categoryController.getMainCategory();
             categoryController.getSubCategory();
+            orderController.getDeliveredOrders();
+            orderController.getUndeliveredOrders();
+            orderController.getAllCoupons();
         print('\n\n\nProduct Change received: ${payload.toString()}');
       },
     ).subscribe();
   }
 
+
+  getMonthName(){
+    List months = ['jan', 'feb', 'mar', 'apr', 'may','jun','jul','aug','sep','oct','nov','dec'];
+    var now = DateTime.now();
+    var currentMon = now.month;
+    List<String> data = [
+      months[currentMon-2],
+      months[currentMon-1],
+      months[currentMon],
+    ];
+    return data;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: const Icon(Icons.menu_outlined, size: 35),
         ),
 
-        title: Text(appName, style: TextStyle(fontSize: 16)),
+        title: const Text(appName, style: TextStyle(fontSize: 16)),
 
         actions: [
 
@@ -86,8 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
               showBadge: true,
               ignorePointer: false,
               onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const NotificationScreen()));
+                Get.toNamed('/notifications');
               },
               badgeContent: const Text('2', style: TextStyle(fontSize: 8),),
               badgeAnimation: const BadgeAnimation.rotation(
@@ -145,8 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               arrowColor: Colors.black54,
               onDetailsPressed: (){
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => LoginScreen()));
+               //Todo account screen
               },
             ),
             ListTile(
@@ -155,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               title: const Text('Analytics'),
               onTap: () {
-                Navigator.pop(context);
+                Get.back();
               },
             ),
             const Divider(),
@@ -166,48 +169,19 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               title: const Text('Orders'),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => OrderScreen()));
+               Get.offAndToNamed('/orders');
               },
             ),
+
             const Divider(),
 
             ListTile(
               leading: const Icon(
-                Icons.shop_outlined,
+                Icons.search,
               ),
-              title: const Text('Products'),
+              title: const Text('Search'),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => ProductScreen()));
-              },
-            ),
-            const Divider(),
-
-            ListTile(
-              leading: const Icon(
-                Icons.category_outlined,
-              ),
-              title: const Text('Categories'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => CategoryScreen()));
-              },
-            ),
-            const Divider(),
-
-            ListTile(
-              leading: const Icon(
-                Icons.person_pin,
-              ),
-              title: const Text('Users'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => UserScreen()));
+                Get.offAndToNamed('/search');
               },
             ),
             const Divider(),
@@ -218,22 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               title: const Text('Notifications'),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => NotificationScreen()));
-              },
-            ),
-            const Divider(),
-
-            ListTile(
-              leading: const Icon(
-                Icons.countertops_outlined,
-              ),
-              title: const Text('Coupons'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => CouponScreen()));
+                Get.offAndToNamed('/notifications');
               },
             ),
             const Divider(),
@@ -244,9 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               title: const Text('Settings'),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => SettingsScreen()));
+                Get.offAndToNamed('/settings');
               },
             ),
             const Divider(),
@@ -257,9 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               title: const Text('Help'),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => HelpScreen()));
+                Get.offAndToNamed('/help');
               },
             ),
             const Divider(),
@@ -270,9 +225,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               title: const Text('About'),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => AboutScreen()));
+                Get.offAndToNamed('/about');
               },
             ),
             const Divider(),
@@ -283,7 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               title: const Text('Logout'),
               onTap: () {
-                Navigator.pop(context);
+                Get.offAll('/');
               },
             ),
             const Divider(),
@@ -295,9 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
               subtitle: const Text('@Buea - 2023',
                   style: TextStyle(fontSize: 8)),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const DevScreen()));
+                Get.offAndToNamed('/developer');
               },
             ),
 
@@ -450,6 +401,57 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 35.0),
 
+              AspectRatio(
+                aspectRatio: 1.23,
+                child: Stack(
+                  children: <Widget>[
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        const SizedBox(
+                          height: 37,
+                        ),
+                        const Text(
+                          'Monthly Sales',
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(
+                          height: 37,
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 16, left: 6),
+                            child: _LineChart(isShowingMainData: isShowingMainData),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.refresh,
+                        color: Colors.white.withOpacity(isShowingMainData ? 1.0 : 0.5),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          isShowingMainData = !isShowingMainData;
+                        });
+                      },
+                    )
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 35.0),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -468,8 +470,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 35.0),
 
-              SizedBox(height: 300),
-
               SizedBox(
                 height: MediaQuery.of(context).size.height / 1.5,
                 width: double.infinity,
@@ -483,6 +483,57 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   children: [
 
+                    Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: Card(
+                          child: ListTile(
+                              title: TextButton.icon(
+                                onPressed: () {
+                                  Get.toNamed('/orders');
+                                },
+                                icon: const Icon(Icons.shopping_basket_outlined, color: Colors.green),
+                                label: const Text('Orders',
+                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                              ),
+                              subtitle: Obx(() => Text(
+                                orderController.ordersAllList.isEmpty ? '0' :
+                                '${orderController.ordersAllList.length}',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 60.0,
+                                ),
+                              )
+                            )
+                          ),
+                        ),
+                    ),
+
+                    Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: Card(
+                          child: ListTile(
+                              title: TextButton.icon(
+                                onPressed: () {
+                                  Get.toNamed('/user');
+                                },
+                                icon: const Icon(Icons.person_outline, color: Colors.deepOrangeAccent),
+                                label: const Text('Users',
+                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                              ),
+                              subtitle: Obx(() => Text(
+                                authController.userList.isEmpty ? '0' :
+                                '${authController.userList.length}',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 60.0,
+                                ),
+                              )
+                            )
+                          ),
+                        ),
+                    ),
 
                     Padding(
                         padding: const EdgeInsets.all(5.0),
@@ -498,7 +549,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               subtitle: Obx(() => Text(
                                 categoryController.mainCategoriesList.isEmpty ? '0' :
-                                '${categoryController.mainCategoriesList.length}',
+                                '${categoryController.mainCategoriesList.length - 1}',
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   color: Colors.white,
@@ -544,7 +595,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 onPressed: () {
                                   Get.toNamed('/product');
                                 },
-                                icon: const Icon(Icons.shop_2_outlined, color: Colors.white38),
+                                icon: const Icon(Icons.shop_2_outlined, color: Colors.yellow),
                                 label: const Text('Products',
                                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                               ),
@@ -562,24 +613,58 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                     ),
 
-                    SizedBox(height: 200),
+                    Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: Card(
+                          child: ListTile(
+                              title: TextButton.icon(
+                                onPressed: () {
+                                  Get.toNamed('/coupons');
+                                },
+                                icon: const Icon(Icons.card_giftcard_outlined, color: Colors.purpleAccent),
+                                label: const Text('Coupons',
+                                    style: TextStyle(color: Colors.white38, fontWeight: FontWeight.bold)),
+                              ),
+                              subtitle: Obx(() => Text(
+                                orderController.couponList.isEmpty ? '0' :
+                                '${orderController.couponList.length}',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 60.0,
+                                ),
+                              )
+                            )
+                          ),
+                        ),
+                    ),
 
-
-                    // overViewWidget(msg: 'All Orders', title: 'Orders',
-                    //     iconData: Icons.shopping_basket_outlined, color: Colors.green,
-                    //     value: orderController.orderCount, page: const OrderScreen()),
-                    //
-                    // overViewWidget(msg: 'All Coupons', title: 'Coupons',
-                    //     iconData: Icons.card_giftcard_outlined, color: Colors.deepOrange,
-                    //     value: productController.couponCount, page: const CouponScreen()),
-                    //
-                    // overViewWidget(msg: 'All Users', title: 'Users',
-                    //     iconData: Icons.person_outline, color: Colors.tealAccent,
-                    //     value: productController.userCount, page: const HomeScreen()),
-
-                    const SizedBox(height: 35.0),
+                    const SizedBox(height: 100)
                   ],
                 ),
+              ),
+
+              const SizedBox(height: 35.0),
+
+              const Text(
+                  'Usage Statistics',
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 3),
+
+              const SizedBox(height: 35.0),
+
+              const LineChartSample2(),
+
+              const SizedBox(height: 80),
+              ListTile(
+                title: const Text('Powered By ASAtech',
+                    style: TextStyle(fontSize: 8)),
+                subtitle: const Text('@Buea - 2023',
+                    style: TextStyle(fontSize: 8)),
+                onTap: () {
+                  Get.offAndToNamed('/developer');
+                },
               ),
 
             ],
@@ -672,8 +757,589 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
   );
 
-  subscribeToRealTime(){
+}
 
+class _LineChart extends StatelessWidget {
+  const _LineChart({required this.isShowingMainData});
+
+  final bool isShowingMainData;
+
+  @override
+  Widget build(BuildContext context) {
+    return LineChart(
+      isShowingMainData ? sampleData1 : sampleData2,
+      swapAnimationDuration: const Duration(milliseconds: 250),
+    );
+  }
+
+  LineChartData get sampleData1 => LineChartData(
+    lineTouchData: lineTouchData1,
+    gridData: gridData,
+    titlesData: titlesData1,
+    borderData: borderData,
+    lineBarsData: lineBarsData1,
+    minX: 0,
+    maxX: 14,
+    maxY: 4,
+    minY: 0,
+  );
+
+  LineChartData get sampleData2 => LineChartData(
+    lineTouchData: lineTouchData2,
+    gridData: gridData,
+    titlesData: titlesData2,
+    borderData: borderData,
+    lineBarsData: lineBarsData2,
+    minX: 0,
+    maxX: 14,
+    maxY: 6,
+    minY: 0,
+  );
+
+  LineTouchData get lineTouchData1 => LineTouchData(
+    handleBuiltInTouches: true,
+    touchTooltipData: LineTouchTooltipData(
+      tooltipBgColor: Colors.blueGrey.withOpacity(0.8),
+    ),
+  );
+
+  FlTitlesData get titlesData1 => FlTitlesData(
+    bottomTitles: AxisTitles(
+      sideTitles: bottomTitles,
+    ),
+    rightTitles: AxisTitles(
+      sideTitles: SideTitles(showTitles: false),
+    ),
+    topTitles: AxisTitles(
+      sideTitles: SideTitles(showTitles: false),
+    ),
+    leftTitles: AxisTitles(
+      sideTitles: leftTitles(),
+    ),
+  );
+
+  List<LineChartBarData> get lineBarsData1 => [
+    lineChartBarData1_1,
+    lineChartBarData1_2,
+    lineChartBarData1_3,
+  ];
+
+  LineTouchData get lineTouchData2 => LineTouchData(
+    enabled: false,
+  );
+
+  FlTitlesData get titlesData2 => FlTitlesData(
+    bottomTitles: AxisTitles(
+      sideTitles: bottomTitles,
+    ),
+    rightTitles: AxisTitles(
+      sideTitles: SideTitles(showTitles: false),
+    ),
+    topTitles: AxisTitles(
+      sideTitles: SideTitles(showTitles: false),
+    ),
+    leftTitles: AxisTitles(
+      sideTitles: leftTitles(),
+    ),
+  );
+
+  List<LineChartBarData> get lineBarsData2 => [
+    lineChartBarData2_1,
+    lineChartBarData2_2,
+    lineChartBarData2_3,
+  ];
+
+  Widget leftTitleWidgets(double value, TitleMeta meta) {
+    const style = TextStyle(
+      fontSize: 14,
+    );
+    String text;
+    switch (value.toInt()) {
+      case 1:
+        text = '1m';
+        break;
+      case 2:
+        text = '800k';
+        break;
+      case 3:
+        text = '600k';
+        break;
+      case 4:
+        text = '400k';
+        break;
+      case 5:
+        text = '200k';
+        break;
+      default:
+        return Container();
+    }
+
+    return Text(text, style: style, textAlign: TextAlign.center);
+  }
+
+  SideTitles leftTitles() => SideTitles(
+    getTitlesWidget: leftTitleWidgets,
+    showTitles: true,
+    interval: 1,
+    reservedSize: 40,
+  );
+
+  Widget bottomTitleWidgets(double value, TitleMeta meta) {
+    const style = TextStyle(
+      fontSize: 14,
+    );
+    Widget text;
+    List<String> monthNames = getMonthName();
+    switch (value.toInt()) {
+      case 2:
+        text = Text(monthNames[0], style: style);
+        break;
+      case 7:
+        text = Text(monthNames[1], style: style);
+        break;
+      case 12:
+        text = Text(monthNames[2], style: style);
+        break;
+      default:
+        text = const Text('');
+        break;
+    }
+    return SideTitleWidget(
+      axisSide: meta.axisSide,
+      space: 10,
+      child: text,
+    );
+  }
+
+  SideTitles get bottomTitles => SideTitles(
+    showTitles: true,
+    reservedSize: 32,
+    interval: 1,
+    getTitlesWidget: bottomTitleWidgets,
+  );
+
+  FlGridData get gridData => FlGridData(show: false);
+
+  FlBorderData get borderData => FlBorderData(
+    show: true,
+    border: Border(
+      bottom:
+      BorderSide(color: primaryColor.withOpacity(0.2), width: 4),
+      left: const BorderSide(color: Colors.transparent),
+      right: const BorderSide(color: Colors.transparent),
+      top: const BorderSide(color: Colors.transparent),
+    ),
+  );
+
+  LineChartBarData get lineChartBarData1_1 => LineChartBarData(
+    isCurved: true,
+    color: Colors.green,
+    barWidth: 8,
+    isStrokeCapRound: true,
+    dotData: FlDotData(show: false),
+    belowBarData: BarAreaData(show: false),
+    spots: const [
+      FlSpot(1, 1),
+      FlSpot(3, 1.5),
+      FlSpot(5, 1.4),
+      FlSpot(7, 3.4),
+      FlSpot(10, 2),
+      FlSpot(12, 2.2),
+      FlSpot(13, 1.8),
+    ],
+  );
+
+  LineChartBarData get lineChartBarData1_2 => LineChartBarData(
+    isCurved: true,
+    color: Colors.pink,
+    barWidth: 8,
+    isStrokeCapRound: true,
+    dotData: FlDotData(show: false),
+    belowBarData: BarAreaData(
+      show: false,
+      color: Colors.pink.withOpacity(0),
+    ),
+    spots: const [
+      FlSpot(1, 1),
+      FlSpot(3, 2.8),
+      FlSpot(7, 1.2),
+      FlSpot(10, 2.8),
+      FlSpot(12, 2.6),
+      FlSpot(13, 3.9),
+    ],
+  );
+
+  LineChartBarData get lineChartBarData1_3 => LineChartBarData(
+    isCurved: true,
+    color: Colors.cyan,
+    barWidth: 8,
+    isStrokeCapRound: true,
+    dotData: FlDotData(show: false),
+    belowBarData: BarAreaData(show: false),
+    spots: const [
+      FlSpot(1, 2.8),
+      FlSpot(3, 1.9),
+      FlSpot(6, 3),
+      FlSpot(10, 1.3),
+      FlSpot(13, 2.5),
+    ],
+  );
+
+  LineChartBarData get lineChartBarData2_1 => LineChartBarData(
+    isCurved: true,
+    curveSmoothness: 0,
+    color: Colors.green.withOpacity(0.5),
+    barWidth: 4,
+    isStrokeCapRound: true,
+    dotData: FlDotData(show: false),
+    belowBarData: BarAreaData(show: false),
+    spots: const [
+      FlSpot(1, 1),
+      FlSpot(3, 4),
+      FlSpot(5, 1.8),
+      FlSpot(7, 5),
+      FlSpot(10, 2),
+      FlSpot(12, 2.2),
+      FlSpot(13, 1.8),
+    ],
+  );
+
+  LineChartBarData get lineChartBarData2_2 => LineChartBarData(
+    isCurved: true,
+    color: Colors.pink.withOpacity(0.5),
+    barWidth: 4,
+    isStrokeCapRound: true,
+    dotData: FlDotData(show: false),
+    belowBarData: BarAreaData(
+      show: true,
+      color: Colors.pink.withOpacity(0.2),
+    ),
+    spots: const [
+      FlSpot(1, 1),
+      FlSpot(3, 2.8),
+      FlSpot(7, 1.2),
+      FlSpot(10, 2.8),
+      FlSpot(12, 2.6),
+      FlSpot(13, 3.9),
+    ],
+  );
+
+  LineChartBarData get lineChartBarData2_3 => LineChartBarData(
+    isCurved: true,
+    curveSmoothness: 0,
+    color: Colors.cyan.withOpacity(0.5),
+    barWidth: 2,
+    isStrokeCapRound: true,
+    dotData: FlDotData(show: true),
+    belowBarData: BarAreaData(show: false),
+    spots: const [
+      FlSpot(1, 3.8),
+      FlSpot(3, 1.9),
+      FlSpot(6, 5),
+      FlSpot(10, 3.3),
+      FlSpot(13, 4.5),
+    ],
+  );
+
+  getMonthName(){
+    List<String> months = ['Jan', 'Feb', 'Mar', 'Apr', 'May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var now = DateTime.now();
+    var currentMon = now.month;
+    List<String> data = [
+      months[currentMon-3],
+      months[currentMon-2],
+      months[currentMon-1],
+    ];
+    return data;
+  }
+}
+
+class LineChartSample2 extends StatefulWidget {
+  const LineChartSample2({super.key});
+
+  @override
+  State<LineChartSample2> createState() => _LineChartSample2State();
+}
+
+class _LineChartSample2State extends State<LineChartSample2> {
+  List<Color> gradientColors = [
+    Colors.cyan,
+    Colors.blue,
+  ];
+
+  bool showAvg = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        AspectRatio(
+          aspectRatio: 1.70,
+          child: Padding(
+            padding: const EdgeInsets.only(
+              right: 18,
+              left: 12,
+              top: 24,
+              bottom: 12,
+            ),
+            child: LineChart(
+              showAvg ? avgData() : mainData(),
+            ),
+          ),
+        ),
+        SizedBox(
+          width: 60,
+          height: 34,
+          child: TextButton(
+            onPressed: () {
+              setState(() {
+                showAvg = !showAvg;
+              });
+            },
+            child: Text(
+              'avg',
+              style: TextStyle(
+                fontSize: 12,
+                color: showAvg ? Colors.white.withOpacity(0.5) : Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget bottomTitleWidgets(double value, TitleMeta meta) {
+    const style = TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 16,
+    );
+    Widget text;
+    switch (value.toInt()) {
+      case 2:
+        text = const Text('MAR', style: style);
+        break;
+      case 5:
+        text = const Text('JUN', style: style);
+        break;
+      case 8:
+        text = const Text('SEP', style: style);
+        break;
+      default:
+        text = const Text('', style: style);
+        break;
+    }
+
+    return SideTitleWidget(
+      axisSide: meta.axisSide,
+      child: text,
+    );
+  }
+
+  Widget leftTitleWidgets(double value, TitleMeta meta) {
+    const style = TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 15,
+    );
+    String text;
+    switch (value.toInt()) {
+      case 1:
+        text = '10K';
+        break;
+      case 3:
+        text = '30k';
+        break;
+      case 5:
+        text = '50k';
+        break;
+      default:
+        return Container();
+    }
+
+    return Text(text, style: style, textAlign: TextAlign.left);
+  }
+
+  LineChartData mainData() {
+    return LineChartData(
+      gridData: FlGridData(
+        show: true,
+        drawVerticalLine: true,
+        horizontalInterval: 1,
+        verticalInterval: 1,
+        getDrawingHorizontalLine: (value) {
+          return FlLine(
+            color: primaryColor,
+            strokeWidth: 1,
+          );
+        },
+        getDrawingVerticalLine: (value) {
+          return FlLine(
+            color: Colors.green,
+            strokeWidth: 1,
+          );
+        },
+      ),
+      titlesData: FlTitlesData(
+        show: true,
+        rightTitles: AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        topTitles: AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            reservedSize: 30,
+            interval: 1,
+            getTitlesWidget: bottomTitleWidgets,
+          ),
+        ),
+        leftTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            interval: 1,
+            getTitlesWidget: leftTitleWidgets,
+            reservedSize: 42,
+          ),
+        ),
+      ),
+      borderData: FlBorderData(
+        show: true,
+        border: Border.all(color: const Color(0xff37434d)),
+      ),
+      minX: 0,
+      maxX: 11,
+      minY: 0,
+      maxY: 6,
+      lineBarsData: [
+        LineChartBarData(
+          spots: const [
+            FlSpot(0, 3),
+            FlSpot(2.6, 2),
+            FlSpot(4.9, 5),
+            FlSpot(6.8, 3.1),
+            FlSpot(8, 4),
+            FlSpot(9.5, 3),
+            FlSpot(11, 4),
+          ],
+          isCurved: true,
+          gradient: LinearGradient(
+            colors: gradientColors,
+          ),
+          barWidth: 5,
+          isStrokeCapRound: true,
+          dotData: FlDotData(
+            show: false,
+          ),
+          belowBarData: BarAreaData(
+            show: true,
+            gradient: LinearGradient(
+              colors: gradientColors
+                  .map((color) => color.withOpacity(0.3))
+                  .toList(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  LineChartData avgData() {
+    return LineChartData(
+      lineTouchData: LineTouchData(enabled: false),
+      gridData: FlGridData(
+        show: true,
+        drawHorizontalLine: true,
+        verticalInterval: 1,
+        horizontalInterval: 1,
+        getDrawingVerticalLine: (value) {
+          return FlLine(
+            color: const Color(0xff37434d),
+            strokeWidth: 1,
+          );
+        },
+        getDrawingHorizontalLine: (value) {
+          return FlLine(
+            color: const Color(0xff37434d),
+            strokeWidth: 1,
+          );
+        },
+      ),
+      titlesData: FlTitlesData(
+        show: true,
+        bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            reservedSize: 30,
+            getTitlesWidget: bottomTitleWidgets,
+            interval: 1,
+          ),
+        ),
+        leftTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            getTitlesWidget: leftTitleWidgets,
+            reservedSize: 42,
+            interval: 1,
+          ),
+        ),
+        topTitles: AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        rightTitles: AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+      ),
+      borderData: FlBorderData(
+        show: true,
+        border: Border.all(color: const Color(0xff37434d)),
+      ),
+      minX: 0,
+      maxX: 11,
+      minY: 0,
+      maxY: 6,
+      lineBarsData: [
+        LineChartBarData(
+          spots: const [
+            FlSpot(0, 3.44),
+            FlSpot(2.6, 3.44),
+            FlSpot(4.9, 3.44),
+            FlSpot(6.8, 3.44),
+            FlSpot(8, 3.44),
+            FlSpot(9.5, 3.44),
+            FlSpot(11, 3.44),
+          ],
+          isCurved: true,
+          gradient: LinearGradient(
+            colors: [
+              ColorTween(begin: gradientColors[0], end: gradientColors[1])
+                  .lerp(0.2)!,
+              ColorTween(begin: gradientColors[0], end: gradientColors[1])
+                  .lerp(0.2)!,
+            ],
+          ),
+          barWidth: 5,
+          isStrokeCapRound: true,
+          dotData: FlDotData(
+            show: false,
+          ),
+          belowBarData: BarAreaData(
+            show: true,
+            gradient: LinearGradient(
+              colors: [
+                ColorTween(begin: gradientColors[0], end: gradientColors[1])
+                    .lerp(0.2)!
+                    .withOpacity(0.1),
+                ColorTween(begin: gradientColors[0], end: gradientColors[1])
+                    .lerp(0.2)!
+                    .withOpacity(0.1),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 

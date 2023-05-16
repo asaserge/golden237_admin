@@ -27,6 +27,7 @@ class _ProductScreenState extends State<ProductScreen> {
   final ProductController productController = Get.find();
   final formatter = NumberFormat('#,###');
   bool isLoading = false;
+  String dropdownValue = 'Default';
 
   @override
   Widget build(BuildContext context) {
@@ -38,87 +39,91 @@ class _ProductScreenState extends State<ProductScreen> {
 
           actions: [
 
-            IconButton(
-              onPressed: (){
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const SearchbarScreen()));
-              },
-              icon: const Icon(Icons.search_outlined),
-            ),
-
-            const SizedBox(width: 25),
-
             Obx(() => Padding(
                 padding: const EdgeInsets.only(top: 21.0, right: 25.0),
-                child: Text('(${productController.allProdCount.value})'))
+                child: Text('(${productController.productList.length})'))
             ),
 
-            IconButton(
-              onPressed: (){
-                setState(() {});
+            DropdownButton<String>(
+              value: dropdownValue,
+              underline: const SizedBox(),
+              elevation: 3,
+              icon: const Icon(Icons.keyboard_arrow_down),
+              items: sort.map((String items) {
+                return DropdownMenuItem(
+                  value: items,
+                  child: Text(items),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  dropdownValue = newValue!;
+                });
               },
-              icon: const Icon(Icons.refresh_outlined)
             ),
 
             const SizedBox(width: 10.0)
           ],
         ),
 
-        body: FutureBuilder(
-            future: productController.getProductByRecent() ,
-            builder: (context, snapshot){
-              if(snapshot.hasError) {
-                return Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(10.0),
-                    margin: const EdgeInsets.symmetric(horizontal: 10.0),
-                    color: Colors.white,
-                    child: Text('Something went wrong: ${snapshot.error}',
-                        style: const TextStyle(color: Colors.red)
-                    ),
-                  ),
-                );
-              }
-              if(snapshot.hasData && snapshot.connectionState == ConnectionState.done){
-                return loadingProduct(snapshot);
-              }
-              else{
-                return const Center(
-                    child: CircularProgressIndicator(
-                      color: primaryColor,
-                      strokeWidth: 3,
-                    )
-                );
-              }
-            }
+        body: Obx(() => productController.productList.isEmpty ?
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset('assets/icons/icons-not-found.png'),
+                const SizedBox(height: 15.0),
+                const Text('No delivered item yet!')
+              ],
+            ),
+          ) :
+          // ListView.builder(
+          //     itemCount: productController.productList.length,
+          //     itemBuilder: (context, index){
+          //       return ProductWidget(productData:
+          //
+          //       );
+          //     }
+          // )
+          SizedBox()
         ),
 
 
 
-        floatingActionButton:  CustomFabWidget(
-          route: '', text: 'Product', width: 120.0,)
+        floatingActionButton: Container(
+          height: 50.0,
+          width: 110.0,
+          padding: const EdgeInsets.symmetric(horizontal: 15.0),
+          decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10.0),
+              border: Border.all(
+                color: Colors.white38,
+              )
+          ),
+          child: Center(
+            child: RawMaterialButton(
+              shape: const CircleBorder(),
+              elevation: 0.0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(
+                    Icons.add_outlined,
+                  ),
+                  SizedBox(width: 5.0),
+                  Text('Product')
+                ],
+              ),
+              onPressed: () {
+                Get.toNamed('/modify_product');
+              },
+            ),
+          ),
+        )
     );
   }
 
-  Widget loadingProduct(AsyncSnapshot snap){
-   return snap.data.length == 0 ?
-   Center(
-     child: Column(
-       mainAxisAlignment: MainAxisAlignment.center,
-       children: [
-         Image.asset('assets/icons/icons-not-found.png'),
-         const SizedBox(height: 15.0),
-         const Text('No delivered item yet!')
-       ],
-     ),
-      ) :
-     ListView.builder(
-       itemCount: snap.data.length,
-       itemBuilder: (context, index){
-         return ProductWidget(productSnapshot: snap, index: index);
-       }
-   );
-  }
 }
 
 

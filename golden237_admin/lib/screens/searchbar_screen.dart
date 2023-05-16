@@ -79,7 +79,7 @@ class _SearchbarScreenState extends State<SearchbarScreen> {
       ),
 
       body: FutureBuilder(
-        future: productController.getProductByRecent(),
+        future: productController.getProductByLatest(),
         builder: (context, snapshot){
           if(snapshot.hasError){
             return const Center(

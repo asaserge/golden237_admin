@@ -55,22 +55,6 @@ flutter:
 
 
   fonts:
-    - family: caro_bold
-      fonts:
-        - asset: assets/fonts/Cairo-Bold.ttf
-
-    - family: caro_medium
-      fonts:
-        - asset: assets/fonts/Cairo-Medium.ttf
-
-    - family: caro_regular
-      fonts:
-        - asset: assets/fonts/Cairo-Regular.ttf
-
-    - family: caro_light
-      fonts:
-        - asset: assets/fonts/Cairo-Light.ttf
-
     - family: montserrat_bold
       fonts:
         - asset: assets/fonts/Montserrat-Bold.ttf

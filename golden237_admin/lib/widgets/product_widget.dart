@@ -9,10 +9,9 @@ import '../services/apis.dart';
 import '../utils/constants.dart';
 
 class ProductWidget extends StatefulWidget {
-  const ProductWidget({Key? key, required this.productSnapshot,
-  required this.index}) : super(key: key);
-  final AsyncSnapshot productSnapshot;
-  final int index;
+  ProductWidget({Key? key,
+    required this.productData}) : super(key: key);
+  var productData;
 
   @override
   State<ProductWidget> createState() => _ProductWidgetState();
@@ -29,9 +28,9 @@ class _ProductWidgetState extends State<ProductWidget> {
 
     return GestureDetector(
       onTap: (){
-        Navigator.of(context).push(MaterialPageRoute(builder: (context) =>
-            ProductDetailScreen(productSnapshot: widget.productSnapshot,
-              index: widget.index)));
+        // Navigator.of(context).push(MaterialPageRoute(builder: (context) =>
+        //     ProductDetailScreen(productSnapshot: widget.productSnapshot,
+        //       index: widget.index)));
       },
       child: Container(
         height: size.height / 4.8,
@@ -59,7 +58,7 @@ class _ProductWidgetState extends State<ProductWidget> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10.0),
                       image: DecorationImage(
-                        image: NetworkImage(widget.productSnapshot.data[widget.index]['image']),
+                        image: NetworkImage(widget.productData['image']),
                         fit: BoxFit.cover,
                         // colorFilter:
                         // const ColorFilter.mode(Colors.white70, BlendMode.colorBurn)
@@ -80,7 +79,7 @@ class _ProductWidgetState extends State<ProductWidget> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 5.0,
                             vertical: 2.0),
-                        child: Text(widget.productSnapshot.data[widget.index]['is_new'] ? 'New' : 'Used'
+                        child: Text(widget.productData['is_new'] ? 'New' : 'Used'
                             ,style: const TextStyle(fontSize: 12.0, color: Colors.green)
                         ),
                       ),
@@ -90,7 +89,7 @@ class _ProductWidgetState extends State<ProductWidget> {
                 ),
 
                 Visibility(
-                  visible: widget.productSnapshot.data[widget.index]['discount'] > 0 ? true : false,
+                  visible: widget.productData['discount'] > 0 ? true : false,
                   child: Positioned(
                     top: 0,
                     right: 2,
@@ -102,9 +101,9 @@ class _ProductWidgetState extends State<ProductWidget> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 3.0,
                               vertical: 3.0),
-                          child: Text('${decimalFormatter.format((widget.productSnapshot.data[widget.index]['price'] -
-                              widget.productSnapshot.data[widget.index]['discount']) /
-                              widget.productSnapshot.data[widget.index]['price'] * 100)}% OFF'
+                          child: Text('${decimalFormatter.format((widget.productData['price'] -
+                              widget.productData['discount']) /
+                              widget.productData['price'] * 100)}% OFF'
                               ,style: const TextStyle(fontSize: 11.0)
                           ),
                         ),
@@ -122,22 +121,22 @@ class _ProductWidgetState extends State<ProductWidget> {
               children: [
                 SizedBox(
                   width: size.width / 2.4,
-                  child: Text(widget.productSnapshot.data[widget.index]['name'], maxLines: 1, overflow: TextOverflow.ellipsis,
+                  child: Text(widget.productData['name'], maxLines: 1, overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 15.0)),
                 ),
-                Text('XAF ${widget.productSnapshot.data[widget.index]['price']}', style: const TextStyle(
+                Text('XAF ${widget.productData['price']}', style: const TextStyle(
                     fontSize: 18.0, color: primaryColor, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8.0),
-                Text('Cat: ${widget.productSnapshot.data[widget.index]['category']['name']}', maxLines: 1, overflow: TextOverflow.ellipsis,
+                Text('Cat: ${widget.productData['category']['name']}', maxLines: 1, overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 14.0)),
                 const SizedBox(height: 3.0),
-                Text('Brand: ${widget.productSnapshot.data[widget.index]['brand']}', maxLines: 1,
+                Text('Brand: ${widget.productData['brand']}', maxLines: 1,
                     overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14.0)),
                 const SizedBox(height: 3.0),
-                Text('Size: ${widget.productSnapshot.data[widget.index]['size']}', maxLines: 1,
+                Text('Size: ${widget.productData['size']}', maxLines: 1,
                     overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14.0)),
                 const SizedBox(height: 3.0),
-                Text('SKU: ${widget.productSnapshot.data[widget.index]['sku']}', style: const TextStyle(fontSize: 14.0)),
+                Text('SKU: ${widget.productData['sku']}', style: const TextStyle(fontSize: 14.0)),
 
               ],
             ),
@@ -147,7 +146,7 @@ class _ProductWidgetState extends State<ProductWidget> {
               children: [
                 GestureDetector(
                   onTap: (){
-                    showMoreOptions(widget.productSnapshot, widget.index);
+                   // showMoreOptions(widget.productSnapshot, widget.index);
                   },
                   child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 10.0),
@@ -290,10 +289,9 @@ class _ProductWidgetState extends State<ProductWidget> {
                 ),
                 title: const Text('More About'),
                 onTap: () {
-                  Navigator.pop(context);
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) =>
-                      ProductDetailScreen(productSnapshot: widget.productSnapshot,
-                          index: widget.index)));
+                  // Navigator.of(context).push(MaterialPageRoute(builder: (context) =>
+                  //     ProductDetailScreen(productSnapshot: widget.productSnapshot,
+                  //         index: widget.index)));
                 },
               ),
               const SizedBox(height: 15.0),
@@ -308,10 +306,10 @@ class _ProductWidgetState extends State<ProductWidget> {
                 ),
                 title: const Text('Edit Product'),
                 onTap: () {
-                  Navigator.pop(context);
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) =>
-                      ModifyProduct(productSnapshot: widget.productSnapshot,
-                          index: widget.index)));
+                  // Navigator.pop(context);
+                  // Navigator.of(context).push(MaterialPageRoute(builder: (context) =>
+                  //     ModifyProduct(productSnapshot: widget.productSnapshot,
+                  //         index: widget.index)));
                 },
               ),
               const Padding(

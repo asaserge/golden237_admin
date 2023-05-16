@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import '../utils/constants.dart';
 
 class DateWidget extends StatefulWidget {
-  DateWidget({Key? key, required this.startDate,
+  const DateWidget({Key? key, required this.startDate,
     required this.endDate}) : super(key: key);
   final TextEditingController startDate;
   final TextEditingController endDate;
@@ -55,7 +55,7 @@ class _DateWidgetState extends State<DateWidget> {
                   firstDate: DateTime.now(),
                   lastDate: DateTime(2100)
               );
-              if(startPickedDate!= null){
+              if(startPickedDate != null){
                 String formattedDate = DateFormat('dd-MM-yyyy').format(startPickedDate);
                 setState(() {
                   widget.startDate.text = formattedDate; //set output date to TextField value.

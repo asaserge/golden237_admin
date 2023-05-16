@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:golden237_admin/controller/order_controller.dart';
 
 import '../models/coupon_model.dart';
 import '../utils/constants.dart';
@@ -14,10 +15,7 @@ import '../widgets/header_widget.dart';
 import '../widgets/submit_button.dart';
 
 class AddCoupon extends StatefulWidget {
-  AddCoupon({Key? key, required this.isAdd, this.start, this.end,
-    this.percent, this.desc, this.code}) : super(key: key);
-  final bool isAdd;
-  String? start; String? end; String? percent; String? desc; String? code;
+  AddCoupon({Key? key}) : super(key: key);
 
   @override
   State<AddCoupon> createState() => _AddCouponState();
@@ -25,44 +23,39 @@ class AddCoupon extends StatefulWidget {
 
 class _AddCouponState extends State<AddCoupon> {
 
-  late TextEditingController _controllerDesc;
   late TextEditingController _controllerCode;
   late TextEditingController _controllerPercent;
   late TextEditingController _controllerStart;
   late TextEditingController _controllerEnd;
+  final OrderController orderController = Get.find();
+  final dynamic couponData = Get.arguments;
+  late String start;
+  late String end;
+  late String code;
+  late String percent;
 
   Helper helper = Helper();
   bool isLoading = false;
-  final _formKey = GlobalKey<FormState>();
+  final _formKeyCoupon = GlobalKey<FormState>();
 
   @override
   void initState() {
-    _controllerDesc =
-    widget.isAdd ? TextEditingController() : TextEditingController(
-        text: '${widget.desc}');
-    _controllerCode =
-    widget.isAdd ? TextEditingController() : TextEditingController(
-        text: '${widget.code}');
-    _controllerPercent =
-    widget.isAdd ? TextEditingController() : TextEditingController(
-        text: '${widget.percent}');
-    _controllerStart =
-    widget.isAdd ? TextEditingController() : TextEditingController(
-        text: '${widget.start}');
-    _controllerEnd =
-    widget.isAdd ? TextEditingController() : TextEditingController(
-        text: '${widget.percent}');
-
     super.initState();
+    start = couponData != null ? couponData[0]['start'] : '';
+    end = couponData != null ? couponData[1]['end'] : '';
+    code = couponData != null ? couponData[2]['code'] : '';
+    percent = couponData != null ? couponData[2]['percent'] : '';
+    _controllerStart = start == '' ? TextEditingController() : TextEditingController(text: start);
+    _controllerEnd = end == '' ? TextEditingController() : TextEditingController(text: end);
+    _controllerCode = code == '' ? TextEditingController() : TextEditingController(text: code);
+    _controllerPercent = code == '' ? TextEditingController() : TextEditingController(text: percent);
   }
 
   @override
   void dispose() {
-    _controllerDesc.dispose();
-    _controllerCode.dispose();
-    _controllerPercent.dispose();
     _controllerStart.dispose();
     _controllerEnd.dispose();
+    _controllerCode.dispose();
     super.dispose();
   }
 
@@ -70,8 +63,7 @@ class _AddCouponState extends State<AddCoupon> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: widget.isAdd ? const Text('Add Coupon') : const Text(
-            'Edit Coupon'),
+        title: start == '' ? const Text('Add Coupon') : const Text('Edit Coupon'),
       ),
 
       body: SingleChildScrollView(
@@ -82,13 +74,13 @@ class _AddCouponState extends State<AddCoupon> {
             children: [
               const HeaderWidget(
                 text: 'You will be able to create a product coupon for Golden237 store',
-                image: 'assets/icons/coupon-icon.png',
+                image: 'assets/icons/icons-coupon.png',
               ),
 
               const SizedBox(height: 25),
 
               Form(
-                  key: _formKey,
+                  key: _formKeyCoupon,
                   child: Column(
                     children: [
                       TextFormField(
@@ -167,27 +159,35 @@ class _AddCouponState extends State<AddCoupon> {
 
                       const SizedBox(height: 15),
 
-                      CustomInput(
-                        controller: _controllerDesc,
-                        hintText: 'Coupon Description',
-                        prefixIcon: Icons.description_outlined,
-                        maxLines: 4,
-                        label: 'Description',
-                        maxCount: 200,
-                        onChange: (val) {
-
-                        },
-                      ),
-
-                      const SizedBox(height: 30),
-
                       DateWidget(startDate: _controllerStart,
                           endDate: _controllerEnd),
 
                       const SizedBox(height: 35),
 
+                      start == '' ?
                       SubmitButton(
-                        text: widget.isAdd ? 'Create Coupon' : 'Edit Country',
+                        text: 'Create Coupon',
+                        isLoading: isLoading,
+                        isEnabled: true,
+                        onPressed: () {
+                          if(_formKeyCoupon.currentState!.validate()){
+                            setState(() {
+                              isLoading = true;
+                            });
+                            CouponModel couponData = CouponModel(
+                              code: _controllerCode.text,
+                              start: _controllerStart.text,
+                              end: _controllerEnd.text,
+                              percent: _controllerPercent.text,
+                            );
+                            orderController.createCouponMethod(coupon: couponData);
+                          }
+                          return;
+                        },
+                      ) :
+
+                      SubmitButton(
+                        text: 'Edit Coupon',
                         isLoading: isLoading,
                         isEnabled: true,
                         onPressed: () {
@@ -195,26 +195,11 @@ class _AddCouponState extends State<AddCoupon> {
                             isLoading = true;
                           });
 
-                          widget.isAdd ?
-                          createProductCoupon(
-                            couponPercent: int.parse(_controllerPercent.text),
-                            couponCode: _controllerCode.text,
-                            couponStart: _controllerStart.text,
-                            couponEnd: _controllerEnd.text,
-                            couponDesc: _controllerDesc.text,
-                            id: ''
-                          ) :
+                          if(_formKeyCoupon.currentState!.validate()){
 
-                          updateProductCoupon(
-                              couponPercent: int.parse(_controllerPercent.text),
-                              couponCode: _controllerCode.text,
-                              couponStart: _controllerStart.text,
-                              couponEnd: _controllerEnd.text,
-                              couponDesc: _controllerDesc.text
-                          );
-                          ;
+                          }
                         },
-                      ),
+                      )
                     ],
                   )
               ),
@@ -234,37 +219,6 @@ class _AddCouponState extends State<AddCoupon> {
     return List.generate(6, (index) => chars[r.nextInt(chars.length)]).join();
   }
 
-  Future<void> createProductCoupon({
-    required int couponPercent, required String couponCode, required String id,
-    required String couponStart, required String couponEnd, required String couponDesc,
-  }) async {
-    CouponModel couponData = CouponModel(
-      id: id,
-      code: couponCode,
-      start: couponStart,
-      end: couponEnd,
-      desc: couponDesc,
-      percent: couponPercent,
-    );
-
-    Get.snackbar('Success!', 'Product created successfully!!.',
-        colorText: Colors.white, backgroundColor: Colors.green,
-        borderRadius: 0
-    );
-  }
-
-
-  Future<void> updateProductCoupon({
-    required int couponPercent, required String couponCode,
-    required String couponStart, required String couponEnd, required String couponDesc,
-  }) async {
-    //Todo add product coupon
-    Get.snackbar('Success!', 'Product updated successfully!!.',
-        colorText: Colors.white, backgroundColor: Colors.green,
-        borderRadius: 0
-    );
-    Navigator.of(context).pop();
-  }
 }
 
 
